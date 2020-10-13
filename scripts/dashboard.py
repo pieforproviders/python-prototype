@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import dash
+import dash_html_components as html
 import dash_table
 import dash_table.FormatTemplate as FormatTemplate
 
@@ -201,52 +202,56 @@ df_dashboard = produce_dashboard_df(all_vars_per_child)
 # dash app
 app = dash.Dash(__name__)
 
-app.layout = dash_table.DataTable(
-    id='child_level',
-    data=df_dashboard.to_dict('records'),
-    columns=[{
-        'id': 'child_id',
-        'name': 'Child ID',
-        'type': 'text'
-    }, {
-        'id': 'case_number',
-        'name': 'Case number',
-        'type': 'text'
-    }, {
-        'id': 'part_day_category',
-        'name': 'Part day category',
-        'type': 'text'
-    }, {
-        'id': 'part_day_attendance_rate',
-        'name': 'Part day attendance rate',
-        'type': 'numeric',
-        'format': FormatTemplate.percentage(2)
-    }, {
-        'id': 'full_day_category',
-        'name': 'Full day category',
-        'type': 'text'
-    }, {
-        'id': 'full_day_attendance_rate',
-        'name': 'Full day attendance rate',
-        'type': 'numeric',
-        'format': FormatTemplate.percentage(2)
-    }, {
-        'id': 'min_revenue',
-        'name': 'Guaranteed revenue',
-        'type': 'numeric',
-        'format': FormatTemplate.money(2)
-    },  {
-        'id': 'max_achievable_revenue',
-        'name': 'Potential revenue',
-        'type': 'numeric',
-        'format': FormatTemplate.money(2)
-    }, {
-        'id': 'max_monthly_payment',
-        'name': 'Max. revenue approved',
-        'type': 'numeric',
-        'format': FormatTemplate.money(2)
-    }]
-    )
+app.layout = html.Div(children=[
+    html.H1(children='Your dashboard'),
+    
+    dash_table.DataTable(
+        id='child_level',
+        data=df_dashboard.to_dict('records'),
+        columns=[{
+            'id': 'child_id',
+            'name': 'Child ID',
+            'type': 'text'
+        }, {
+            'id': 'case_number',
+            'name': 'Case number',
+            'type': 'text'
+        }, {
+            'id': 'part_day_category',
+            'name': 'Part day category',
+            'type': 'text'
+        }, {
+            'id': 'part_day_attendance_rate',
+            'name': 'Part day attendance rate',
+            'type': 'numeric',
+            'format': FormatTemplate.percentage(2)
+        }, {
+            'id': 'full_day_category',
+            'name': 'Full day category',
+            'type': 'text'
+        }, {
+            'id': 'full_day_attendance_rate',
+            'name': 'Full day attendance rate',
+            'type': 'numeric',
+            'format': FormatTemplate.percentage(2)
+        }, {
+            'id': 'min_revenue',
+            'name': 'Guaranteed revenue',
+            'type': 'numeric',
+            'format': FormatTemplate.money(2)
+        },  {
+            'id': 'max_achievable_revenue',
+            'name': 'Potential revenue',
+            'type': 'numeric',
+            'format': FormatTemplate.money(2)
+        }, {
+            'id': 'max_monthly_payment',
+            'name': 'Max. revenue approved',
+            'type': 'numeric',
+            'format': FormatTemplate.money(2)
+        }]
+    )    
+])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
