@@ -249,7 +249,65 @@ app.layout = html.Div(children=[
             'name': 'Max. revenue approved',
             'type': 'numeric',
             'format': FormatTemplate.money(2)
-        }]
+        }],
+        style_data_conditional=[
+            {
+                'if': {
+                    'filter_query': '{part_day_category} = "Sure bet"',
+                    'column_id': 'part_day_category' 
+                },
+                'color': 'darkgreen'
+            },
+            {
+                'if': {
+                    'filter_query': '{part_day_category} = "Not met"',
+                    'column_id': 'part_day_category' 
+                },
+                'color': '#FF4136'
+            },
+            {
+                'if': {
+                    'filter_query': '{part_day_category} = "At risk"',
+                    'column_id': 'part_day_category' 
+                },
+                'color': '#FF851B'
+            },
+            {
+                'if': {
+                    'filter_query': '{part_day_category} = "On track"',
+                    'column_id': 'part_day_category' 
+                },
+                'color': '#2ECC40'
+            },
+                        {
+                'if': {
+                    'filter_query': '{full_day_category} = "Sure bet"',
+                    'column_id': 'full_day_category' 
+                },
+                'color': 'darkgreen'
+            },
+            {
+                'if': {
+                    'filter_query': '{full_day_category} = "Not met"',
+                    'column_id': 'full_day_category' 
+                },
+                'color': '#FF4136'
+            },
+            {
+                'if': {
+                    'filter_query': '{full_day_category} = "At risk"',
+                    'column_id': 'full_day_category' 
+                },
+                'color': '#FF851B'
+            },
+            {
+                'if': {
+                    'filter_query': '{full_day_category} = "On track"',
+                    'column_id': 'full_day_category' 
+                },
+                'color': '#2ECC40'
+            }
+        ]
     )    
 ])
 
