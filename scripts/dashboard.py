@@ -8,6 +8,14 @@ import dash_html_components as html
 import dash_table
 import dash_table.FormatTemplate as FormatTemplate
 
+
+def calculate_month_days(attendance_df):
+    # calculate days left and month
+    max_attended_date = attendance_df['date'].max()
+    month_days = max_attended_date.daysinmonth
+    days_left = month_days - max_attended_date.day
+    return month_days, days_left
+
 def process_attendance_data(attendance_df):
     # count number of part and full days attended
     def count_part_days(row):
@@ -41,7 +49,7 @@ def process_attendance_data(attendance_df):
 
     return attendance_per_child
 
-def process_merged_data(merged_df, days_left):
+def process_merged_data(merged_df, month_days, days_left):
     # helper function to categorize 
     def categorize_families_part_day(row, days_left):
         # part day
@@ -52,8 +60,9 @@ def process_merged_data(merged_df, days_left):
         elif ((0.795 * row['family_part_days_approved'] - row['family_part_days_attended'])
                 > days_left):
             return 'Not met'
-        # at risk (using percentage rule at 50% of month)
-        elif row['family_part_days_attended'] / (0.5 * row['family_part_days_approved']) < 0.795:
+        # at risk (using percentage rule based on adjusted attendance rate)
+        elif (row['family_part_days_attended'] 
+                / (((month_days - days_left) / month_days) * row['family_part_days_approved']) < 0.795):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
@@ -68,7 +77,8 @@ def process_merged_data(merged_df, days_left):
             > days_left):
             return 'Not met'
         # at risk (using percentage rule at 50% of month)
-        elif row['family_full_days_attended'] / (0.5 * row['family_full_days_approved']) < 0.795:
+        elif (row['family_full_days_attended'] 
+                / (((month_days - days_left) / month_days) * row['family_full_days_approved']) < 0.795):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
@@ -158,8 +168,9 @@ def calculate_attendance_rate(df):
 
 def produce_dashboard_df(df):
     # filter to required columns
-    cols_to_keep = ['child_id',
+    cols_to_keep = ['name',
                     'case_number',
+                    'biz_name',
                     'part_day_category',
                     'part_day_attendance_rate',
                     'full_day_category',
@@ -171,29 +182,67 @@ def produce_dashboard_df(df):
 
     return df_sub
 
-# define month variables needed for categorization 
-month_days = 30
-days_left = 15
-
 data_dir = Path(__file__).parent.parent.absolute().joinpath('data')
 
 # load data
-attendance = pd.read_csv(data_dir.joinpath('Attendance_Data.csv'))
-payment = pd.read_csv(data_dir.joinpath('Visualization_Data.csv'))
+attendance = pd.read_csv(data_dir.joinpath('Attendance_Calculation_Sep-2020.csv'),
+                            usecols=['Child ID',
+                                    'Date',
+                                    'School account',
+                                    'Hours checked in',
+                                    'Minutes checked in'])
+payment = pd.read_csv(data_dir.joinpath('Sample_Billing_Reconciliation.csv'),
+                        skiprows=1,
+                        usecols=['First name (required)',
+                                'Last name (required)',
+                                'Business Name (required)',
+                                'Case number',
+                                'Maximum monthly payment',
+                                'Full day rate minus copay',
+                                'Part day rate minus copay',
+                                'Full days',
+                                'Part days',
+                                'Child ID'
+                                ])
+
+# rename columns to standardize names
+attendance.rename(columns={'Child ID': 'child_id',
+                            'Date': 'date',
+                            'School account': 'biz_name',
+                            'Hours checked in': 'hours_checked_in',
+                            'Minutes checked in': 'mins_checked_in'},
+                  inplace=True)
+
+payment.rename(columns={'First name (required)': 'first_name',
+                        'Last name (required)': 'last_name',
+                        'Business Name (required)': 'biz_name',
+                        'Case number': 'case_number',
+                        'Maximum monthly payment': 'max_monthly_payment',
+                        'Full day rate minus copay': 'full_day_rate_no_copay',
+                        'Part day rate minus copay': 'part_day_rate_no_copay',
+                        'Full days': 'full_days_approved',
+                        'Part days': 'part_days_approved',
+                        'Child ID': 'child_id'},
+                inplace=True)
+
 
 attendance['date'] = pd.to_datetime(attendance['date'])
+payment['name'] = payment['first_name'] + ' ' + payment['last_name']
 
 # subset attendance to half month
-attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-02-15'), :].copy()
+attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
 attendance_processed = process_attendance_data(attendance_half)
+
+# calculate days left
+month_days, days_left = calculate_month_days(attendance_half)
 
 # join attendance data to payment data
 payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
 
-payment_attendance_processed = process_merged_data(payment_attendance, days_left)
+payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
 
 revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
-                                                     days_left)
+                                                    days_left)
 
 all_vars_per_child = calculate_attendance_rate(revenues_per_child_df)
 
@@ -209,12 +258,16 @@ app.layout = html.Div(children=[
         id='child_level',
         data=df_dashboard.to_dict('records'),
         columns=[{
-            'id': 'child_id',
-            'name': 'Child ID',
+            'id': 'name',
+            'name': 'Child name',
             'type': 'text'
         }, {
             'id': 'case_number',
             'name': 'Case number',
+            'type': 'text'
+        }, {
+            'id': 'biz_name',
+            'name': 'Business',
             'type': 'text'
         }, {
             'id': 'part_day_category',
