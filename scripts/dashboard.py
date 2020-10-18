@@ -360,7 +360,10 @@ app.layout = html.Div(children=[
                 },
                 'color': '#2ECC40'
             }
-        ]
+        ],
+        editable=True,
+        sort_action='native',
+        sort_mode='single',
     )    
 ])
 
