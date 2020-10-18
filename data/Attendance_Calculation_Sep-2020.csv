@@ -1,0 +1,61 @@
+First name,Last name,Date,School account,Child ID,Hours checked in,Minutes checked in,Hours fraction,Full days,Part days
+Jan,Schakowsky,2020-09-01,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,11,44,11.73333333,1,0
+Keith,Ellison,2020-09-01,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,3,34,3.566666667,0,1
+Lauren,Underwood,2020-09-01,Goslings Grow,LaurenUnderwoodGoslingsGrow,10,26,10.43333333,1,0
+Keith,Ellison,2020-09-02,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,5,0,5,1,0
+Kirsten,Gillibrand,2020-09-02,Goslings Grow,KirstenGillibrandGoslingsGrow,10,5,10.08333333,1,0
+Keith,Ellison,2020-09-03,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,1,2,1.033333333,0,1
+Lauren,Underwood,2020-09-03,Goslings Grow,LaurenUnderwoodGoslingsGrow,3,32,3.533333333,0,1
+Jan,Schakowsky,2020-09-04,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,3,12,3.2,0,1
+Keith,Ellison,2020-09-05,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,4,25,4.416666667,0,1
+Kirsten,Gillibrand,2020-09-05,Goslings Grow,KirstenGillibrandGoslingsGrow,11,27,11.45,1,0
+Keith,Ellison,2020-09-06,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,11,46,11.76666667,1,0
+Jan,Schakowsky,2020-09-07,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,11,28,11.46666667,1,0
+Kirsten,Gillibrand,2020-09-08,Goslings Grow,KirstenGillibrandGoslingsGrow,7,19,7.316666667,1,0
+Lauren,Underwood,2020-09-08,Goslings Grow,LaurenUnderwoodGoslingsGrow,10,0,10,1,0
+Jan,Schakowsky,2020-09-09,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,5,14,5.233333333,1,0
+Keith,Ellison,2020-09-09,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,6,13,6.216666667,1,0
+Jan,Schakowsky,2020-09-10,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,11,42,11.7,1,0
+Keith,Ellison,2020-09-10,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,6,34,6.566666667,1,0
+Jan,Schakowsky,2020-09-11,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,2,22,2.366666667,0,1
+Kirsten,Gillibrand,2020-09-11,Goslings Grow,KirstenGillibrandGoslingsGrow,2,43,2.716666667,0,1
+Jan,Schakowsky,2020-09-12,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,3,35,3.583333333,0,1
+Keith,Ellison,2020-09-12,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,1,0,1,0,1
+Lauren,Underwood,2020-09-12,Goslings Grow,LaurenUnderwoodGoslingsGrow,6,56,6.933333333,1,0
+Jan,Schakowsky,2020-09-13,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,7,38,7.633333333,1,0
+Kirsten,Gillibrand,2020-09-13,Goslings Grow,KirstenGillibrandGoslingsGrow,7,27,7.45,1,0
+Jan,Schakowsky,2020-09-14,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,10,31,10.51666667,1,0
+Keith,Ellison,2020-09-14,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,9,36,9.6,1,0
+Kirsten,Gillibrand,2020-09-14,Goslings Grow,KirstenGillibrandGoslingsGrow,8,43,8.716666667,1,0
+Lauren,Underwood,2020-09-14,Goslings Grow,LaurenUnderwoodGoslingsGrow,7,56,7.933333333,1,0
+Keith,Ellison,2020-09-15,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,7,4,7.066666667,1,0
+Jan,Schakowsky,2020-09-16,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,5,5,5.083333333,1,0
+Keith,Ellison,2020-09-16,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,9,1,9.016666667,1,0
+Kirsten,Gillibrand,2020-09-16,Goslings Grow,KirstenGillibrandGoslingsGrow,9,15,9.25,1,0
+Lauren,Underwood,2020-09-17,Goslings Grow,LaurenUnderwoodGoslingsGrow,3,19,3.316666667,0,1
+Jan,Schakowsky,2020-09-18,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,6,25,6.416666667,1,0
+Keith,Ellison,2020-09-18,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,8,48,8.8,1,0
+Kirsten,Gillibrand,2020-09-18,Goslings Grow,KirstenGillibrandGoslingsGrow,10,58,10.96666667,1,0
+Jan,Schakowsky,2020-09-20,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,3,43,3.716666667,0,1
+Keith,Ellison,2020-09-20,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,1,57,1.95,0,1
+Lauren,Underwood,2020-09-20,Goslings Grow,LaurenUnderwoodGoslingsGrow,8,6,8.1,1,0
+Keith,Ellison,2020-09-21,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,5,2,5.033333333,1,0
+Kirsten,Gillibrand,2020-09-21,Goslings Grow,KirstenGillibrandGoslingsGrow,7,5,7.083333333,1,0
+Lauren,Underwood,2020-09-21,Goslings Grow,LaurenUnderwoodGoslingsGrow,8,40,8.666666667,1,0
+Jan,Schakowsky,2020-09-22,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,7,31,7.516666667,1,0
+Kirsten,Gillibrand,2020-09-22,Goslings Grow,KirstenGillibrandGoslingsGrow,5,2,5.033333333,1,0
+Jan,Schakowsky,2020-09-23,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,5,31,5.516666667,1,0
+Keith,Ellison,2020-09-23,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,11,36,11.6,1,0
+Jan,Schakowsky,2020-09-24,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,2,54,2.9,0,1
+Keith,Ellison,2020-09-24,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,10,48,10.8,1,0
+Keith,Ellison,2020-09-25,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,4,51,4.85,0,1
+Lauren,Underwood,2020-09-25,Goslings Grow,LaurenUnderwoodGoslingsGrow,8,31,8.516666667,1,0
+Jan,Schakowsky,2020-09-26,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,5,3,5.05,1,0
+Keith,Ellison,2020-09-26,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,2,48,2.8,0,1
+Lauren,Underwood,2020-09-26,Goslings Grow,LaurenUnderwoodGoslingsGrow,7,51,7.85,1,0
+Jan,Schakowsky,2020-09-27,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,4,54,4.9,0,1
+Kirsten,Gillibrand,2020-09-27,Goslings Grow,KirstenGillibrandGoslingsGrow,11,28,11.46666667,1,0
+Jan,Schakowsky,2020-09-28,Lil Baby Ducklings,JanSchakowskyLilBabyDucklings,6,10,6.166666667,1,0
+Keith,Ellison,2020-09-29,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,7,38,7.633333333,1,0
+Kirsten,Gillibrand,2020-09-29,Goslings Grow,KirstenGillibrandGoslingsGrow,4,59,4.983333333,0,1
+Keith,Ellison,2020-09-30,Lil Baby Ducklings,KeithEllisonLilBabyDucklings,3,11,3.183333333,0,1
