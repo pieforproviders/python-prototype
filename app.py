@@ -69,6 +69,14 @@ app.layout = html.Div(children=[
         style_data_conditional=[
             {
                 'if': {
+                    'filter_query': '{part_day_category} = "Not enough information"',
+                    'column_id': 'part_day_category'
+                },
+                'backgroundColor': 'rgb(248, 248, 248)',
+                'color': 'rgb(128,128,128)'
+            },
+            {
+                'if': {
                     'filter_query': '{part_day_category} = "Sure bet"',
                     'column_id': 'part_day_category' 
                 },
@@ -94,6 +102,14 @@ app.layout = html.Div(children=[
                     'column_id': 'part_day_category' 
                 },
                 'color': '#2ECC40'
+            },
+            {
+                'if': {
+                    'filter_query': '{full_day_category} = "Not enough information"',
+                    'column_id': 'full_day_category'
+                },
+                'backgroundColor': 'rgb(248, 248, 248)',
+                'color': 'rgb(128,128,128)'
             },
                         {
                 'if': {
