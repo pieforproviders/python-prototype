@@ -96,8 +96,11 @@ def process_merged_data(merged_df, month_days, days_left):
     # helper function to categorize 
     def categorize_families_part_day(row, days_left):
         # part day
+        # not enough information
+        if (month_days - days_left)/month_days < 0.5:
+            return 'Not enough information' 
         # sure bet
-        if row['family_part_days_attended'] >= (0.795 * row['family_part_days_approved']):
+        elif row['family_part_days_attended'] >= (0.795 * row['family_part_days_approved']):
             return 'Sure bet'
         # not met
         elif ((0.795 * row['family_part_days_approved'] - row['family_part_days_attended'])
@@ -112,8 +115,11 @@ def process_merged_data(merged_df, month_days, days_left):
             return 'On track'
 
     def categorize_families_full_day(row, days_left):
+        # not enough informaton
+        if (month_days - days_left)/month_days < 0.5:
+            return 'Not enough information' 
         # sure bet
-        if row['family_full_days_attended'] >= (0.795 * row['family_full_days_approved']):
+        elif row['family_full_days_attended'] >= (0.795 * row['family_full_days_approved']):
             return 'Sure bet'
         # not met
         elif ((0.795 * row['family_full_days_approved'] - row['family_full_days_attended'])
