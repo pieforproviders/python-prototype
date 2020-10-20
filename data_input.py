@@ -30,8 +30,9 @@ def get_payment_data():
                                     'Business Name (required)',
                                     'Case number',
                                     'Maximum monthly payment',
-                                    'Full day rate minus copay',
-                                    'Part day rate minus copay',
+                                    'Total full day rate',
+                                    'Total part day rate',
+                                    'Co-pay per child',
                                     'Full days',
                                     'Part days',
                                     'Child ID'
@@ -42,8 +43,9 @@ def get_payment_data():
                             'Business Name (required)': 'biz_name',
                             'Case number': 'case_number',
                             'Maximum monthly payment': 'max_monthly_payment',
-                            'Full day rate minus copay': 'full_day_rate_no_copay',
-                            'Part day rate minus copay': 'part_day_rate_no_copay',
+                            'Total full day rate': 'full_day_rate',
+                            'Total part day rate': 'part_day_rate',
+                            'Co-pay per child': 'copay',
                             'Full days': 'full_days_approved',
                             'Part days': 'part_days_approved',
                             'Child ID': 'child_id'},
@@ -159,40 +161,40 @@ def calculate_revenues_per_child(merged_df, days_left):
         # max achievable revenue is approved days * rate unless threshold is already not met
         # full day
         if row['full_day_category'] == 'Not met':
-            full_day_max_revenue = (row['full_days_attended'] + days_left) * row['full_day_rate_no_copay']  
+            full_day_max_revenue = (row['full_days_attended'] + days_left) * row['full_day_rate']  
         else:
-            full_day_max_revenue = row['full_days_approved'] * row['full_day_rate_no_copay']
+            full_day_max_revenue = row['full_days_approved'] * row['full_day_rate']
         # part day
         if row['part_day_category'] == 'Not met':
-            part_day_max_revenue = (row['part_days_attended'] + days_left) * row['part_day_rate_no_copay']  
+            part_day_max_revenue = (row['part_days_attended'] + days_left) * row['part_day_rate']  
         else:
-            part_day_max_revenue = row['part_days_approved'] * row['part_day_rate_no_copay']
-        return full_day_max_revenue + part_day_max_revenue
+            part_day_max_revenue = row['part_days_approved'] * row['part_day_rate']
+        return full_day_max_revenue + part_day_max_revenue - row['copay']
 
     def calculate_min_revenue(row):
         # min revenue is attended days * rate, unless sure bet
         # full day
         if row['full_day_category'] == 'Sure bet':
-            full_day_min_revenue = row['full_days_approved'] * row['full_day_rate_no_copay']
+            full_day_min_revenue = row['full_days_approved'] * row['full_day_rate']
         else:
-            full_day_min_revenue = row['full_days_attended'] * row['full_day_rate_no_copay']
+            full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
         # part day
         if row['part_day_category'] == 'Sure bet':
-            part_day_min_revenue = row['part_days_approved'] * row['part_day_rate_no_copay']
+            part_day_min_revenue = row['part_days_approved'] * row['part_day_rate']
         else:
-            part_day_min_revenue = row['part_days_attended'] * row['part_day_rate_no_copay'] 
-        return full_day_min_revenue + part_day_min_revenue
+            part_day_min_revenue = row['part_days_attended'] * row['part_day_rate'] 
+        return full_day_min_revenue + part_day_min_revenue - row['copay']
 
     # leave out in danger revenues for now
     # def calculate_in_danger_revenue(row):
     #   if row['full_day_category'] == 'At risk':
     #     full_in_danger_revenue = ((row['full_days_approved'] - row['full_days_attended'])
-    #                             * row['full_day_rate_no_copay'])
+    #                             * row['full_day_rate'])
     #   else:
     #     full_in_danger_revenue = 0
     #   if row['part_day_category'] == 'At risk':
     #     part_in_danger_revenue = ((row['part_days_approved'] - row['part_days_attended'])
-    #                             * row['part_day_rate_no_copay'])
+    #                             * row['part_day_rate'])
     #   else:
     #     part_in_danger_revenue = 0
     #   return full_in_danger_revenue + part_in_danger_revenue
