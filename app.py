@@ -10,7 +10,7 @@ import dash_table.FormatTemplate as FormatTemplate
 from data_input import get_dashboard_data
 
 # load data
-df_dashboard = get_dashboard_data()
+df_dashboard, latest_date = get_dashboard_data()
 min_revenue_sum = df_dashboard['min_revenue'].sum()
 max_achievable_revenue_sum = df_dashboard['max_achievable_revenue'].sum()
 max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
@@ -184,6 +184,8 @@ child_table = dash_table.DataTable(
 app.layout = dbc.Container(
     [
         html.H1(children='Your dashboard'),
+
+        html.H2('Estimates as of ' + latest_date),
 
         # Summary statistics
         html.Div(

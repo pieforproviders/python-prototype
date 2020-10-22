@@ -238,6 +238,9 @@ def get_dashboard_data():
     # subset attendance to half month to simulate having onlf half month data
     attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
 
+    # get latest date in attendance data
+    latest_date = attendance_half['date'].max().strftime('%b %d %Y')
+
     # calculate days in month and days left in month
     month_days, days_left = calculate_month_days(attendance_half)
 
@@ -249,4 +252,4 @@ def get_dashboard_data():
                                                         days_left)
     all_vars_per_child = calculate_attendance_rate(revenues_per_child_df)
     df_dashboard = produce_dashboard_df(all_vars_per_child)
-    return df_dashboard
+    return df_dashboard, latest_date
