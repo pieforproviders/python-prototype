@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -18,6 +20,25 @@ max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 # dash app
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.FLATLY])
+
+# navbar
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            # Use row and col to control vertical alignment of logo / brand
+            dbc.Row(
+                [
+                    dbc.Col(html.Img(src="", height="30px")),
+                    dbc.Col(dbc.NavbarBrand("Pie for Providers", className="ml-2")),
+                ],
+                align="center",
+                no_gutters=True,
+            )
+        ],
+        fluid=True
+    ),
+    color="light"
+)
 
 # summary cards
 guaranteed_revenue_card = dbc.Card(
@@ -192,39 +213,43 @@ child_table = dash_table.DataTable(
                 sort_mode='single',
             )
 
-app.layout = dbc.Container(
-    [
-        html.H1(children='Your dashboard'),
+app.layout = html.Div(
+    [navbar,
+        dbc.Container(
+            [   
+                html.H1(children='Your dashboard'),
 
-        html.H2('Estimates as of ' + latest_date),
+                html.H2('Estimates as of ' + latest_date),
 
-        html.Div(
-            dbc.Alert('At-risk case warnings will be available with '
-                         + str(days_req_for_warnings) 
-                         + ' days of attendance data',
-                         color='info',
-                         is_open=is_data_insufficient)
-        ),
-
-        # Summary statistics
-        html.Div(
-            [
-                dbc.CardGroup(
-                    [
-                        guaranteed_revenue_card,
-                        potential_revenue_card,
-                        max_approved_revenue_card
-                    ],
+                html.Div(
+                    dbc.Alert('At-risk case warnings will be available with '
+                                + str(days_req_for_warnings) 
+                                + ' days of attendance data',
+                                color='info',
+                                is_open=is_data_insufficient)
                 ),
+
+                # Summary statistics
+                html.Div(
+                    [
+                        dbc.CardGroup(
+                            [
+                                guaranteed_revenue_card,
+                                potential_revenue_card,
+                                max_approved_revenue_card
+                            ],
+                        ),
+                    ]
+                ),
+
+                html.Br(),
+
+                # Child level table
+                html.Div(
+                    child_table
+                )
             ]
-        ),
-
-        html.Br(),
-
-        # Child level table
-        html.Div(
-            child_table
-        )
+        )   
     ]
 )
 
