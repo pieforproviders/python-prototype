@@ -10,6 +10,9 @@ from data_input import get_dashboard_data
 
 # load data
 df_dashboard = get_dashboard_data()
+min_revenue_sum = df_dashboard['min_revenue'].sum()
+max_achievable_revenue_sum = df_dashboard['max_achievable_revenue'].sum()
+max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 
 # dash app
 app = dash.Dash(__name__)
