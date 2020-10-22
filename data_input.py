@@ -1,5 +1,7 @@
 from pathlib import Path
- 
+
+import math
+
 import numpy as np
 import pandas as pd
 
@@ -244,6 +246,12 @@ def get_dashboard_data():
     # calculate days in month and days left in month
     month_days, days_left = calculate_month_days(attendance_half)
 
+    # check if data is insufficient
+    is_data_insufficient = (month_days - days_left)/month_days < 0.5
+
+    # calculate number of days required for at-risk warnings to be shown
+    days_req_for_warnings = math.ceil(month_days/2)
+
     # process data for dashboard
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
@@ -252,4 +260,4 @@ def get_dashboard_data():
                                                         days_left)
     all_vars_per_child = calculate_attendance_rate(revenues_per_child_df)
     df_dashboard = produce_dashboard_df(all_vars_per_child)
-    return df_dashboard, latest_date
+    return df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings

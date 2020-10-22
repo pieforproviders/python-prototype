@@ -10,7 +10,7 @@ import dash_table.FormatTemplate as FormatTemplate
 from data_input import get_dashboard_data
 
 # load data
-df_dashboard, latest_date = get_dashboard_data()
+df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
 min_revenue_sum = df_dashboard['min_revenue'].sum()
 max_achievable_revenue_sum = df_dashboard['max_achievable_revenue'].sum()
 max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
@@ -186,6 +186,14 @@ app.layout = dbc.Container(
         html.H1(children='Your dashboard'),
 
         html.H2('Estimates as of ' + latest_date),
+
+        html.Div(
+            dbc.Alert('At-risk case warnings will be available with '
+                         + str(days_req_for_warnings) 
+                         + ' days of attendance data',
+                         color='info',
+                         is_open=is_data_insufficient)
+        ),
 
         # Summary statistics
         html.Div(
