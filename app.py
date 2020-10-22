@@ -21,37 +21,43 @@ app = dash.Dash(__name__,
 
 # summary cards
 guaranteed_revenue_card = dbc.Card(
-                    dbc.CardBody(
-                        [
-                            html.H5("Guaranteed revenue", className="card-title"),
-                            html.P(
-                                '$' + str(round(min_revenue_sum, 2)), className="card-title"
-                            )
-                        ]
-                    )  
+    [
+        dbc.CardHeader("Guaranteed revenue"),
+        dbc.CardBody(
+            [
+                html.H4(
+                    '$' + str(round(min_revenue_sum, 2)), className="card-title font-weight-bold"
                 )
+            ]
+        )  
+    ]
+)
 
 potential_revenue_card = dbc.Card(
-                    dbc.CardBody(
-                        [
-                            html.H5("Potential revenue", className="card-title"),
-                            html.P(
-                                '$' + str(round(max_achievable_revenue_sum, 2)), className="card-title"
-                            )
-                        ]
-                    )
+    [
+        dbc.CardHeader("Potential revenue"),
+        dbc.CardBody(
+            [
+                html.H4(
+                    '$' + str(round(max_approved_revenue_sum, 2)), className="card-title font-weight-bold"
                 )
+            ]
+        )  
+    ]
+)
 
 max_approved_revenue_card = dbc.Card(
-                    dbc.CardBody(
-                        [
-                            html.H5("Max. approved revenue", className="card-title"),
-                            html.P(
-                                '$' + str(round(max_approved_revenue_sum, 2)), className="card-title"
-                            )
-                        ]
-                    )
+    [
+        dbc.CardHeader("Max. approved revenue"),
+        dbc.CardBody(
+            [
+                html.H4(
+                    '$' + str(round(max_achievable_revenue_sum, 2)), className="card-title font-weight-bold"
                 )
+            ]
+        )  
+    ]
+)
 
 # child level table
 child_table = dash_table.DataTable(
