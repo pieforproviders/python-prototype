@@ -183,6 +183,11 @@ child_table = dash_table.DataTable(
                         'color': '#2ECC40'
                     }
                 ],
+                style_table=
+                    {
+                        'overflowX': 'scroll',
+                        'padding': '20px'
+                    },
                 sort_action='native',
                 sort_mode='single',
             )
