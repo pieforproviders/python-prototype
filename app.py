@@ -28,7 +28,7 @@ guaranteed_revenue_card = dbc.Card(
                                 '$' + str(round(min_revenue_sum, 2)), className="card-title"
                             )
                         ]
-                    )
+                    )  
                 )
 
 potential_revenue_card = dbc.Card(
@@ -53,145 +53,157 @@ max_approved_revenue_card = dbc.Card(
                     )
                 )
 
+# child level table
+child_table = dash_table.DataTable(
+                id='child_level',
+                data=df_dashboard.to_dict('records'),
+                columns=[{
+                    'id': 'name',
+                    'name': 'Child name',
+                    'type': 'text'
+                }, {
+                    'id': 'case_number',
+                    'name': 'Case number',
+                    'type': 'text'
+                }, {
+                    'id': 'biz_name',
+                    'name': 'Business',
+                    'type': 'text'
+                }, {
+                    'id': 'part_day_category',
+                    'name': 'Part day category',
+                    'type': 'text'
+                }, {
+                    'id': 'part_day_attendance_rate',
+                    'name': 'Part day attendance rate',
+                    'type': 'numeric',
+                    'format': FormatTemplate.percentage(2)
+                }, {
+                    'id': 'full_day_category',
+                    'name': 'Full day category',
+                    'type': 'text'
+                }, {
+                    'id': 'full_day_attendance_rate',
+                    'name': 'Full day attendance rate',
+                    'type': 'numeric',
+                    'format': FormatTemplate.percentage(2)
+                }, {
+                    'id': 'min_revenue',
+                    'name': 'Guaranteed revenue',
+                    'type': 'numeric',
+                    'format': FormatTemplate.money(2)
+                },  {
+                    'id': 'max_achievable_revenue',
+                    'name': 'Potential revenue',
+                    'type': 'numeric',
+                    'format': FormatTemplate.money(2)
+                }, {
+                    'id': 'max_monthly_payment',
+                    'name': 'Max. revenue approved',
+                    'type': 'numeric',
+                    'format': FormatTemplate.money(2)
+                }],
+                style_data_conditional=[
+                    {
+                        'if': {
+                            'filter_query': '{part_day_category} = "Not enough information"',
+                            'column_id': 'part_day_category'
+                        },
+                        'backgroundColor': 'rgb(248, 248, 248)',
+                        'color': 'rgb(128,128,128)'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{part_day_category} = "Sure bet"',
+                            'column_id': 'part_day_category' 
+                        },
+                        'color': 'darkgreen'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{part_day_category} = "Not met"',
+                            'column_id': 'part_day_category' 
+                        },
+                        'color': '#FF4136'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{part_day_category} = "At risk"',
+                            'column_id': 'part_day_category' 
+                        },
+                        'color': '#FF851B'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{part_day_category} = "On track"',
+                            'column_id': 'part_day_category' 
+                        },
+                        'color': '#2ECC40'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{full_day_category} = "Not enough information"',
+                            'column_id': 'full_day_category'
+                        },
+                        'backgroundColor': 'rgb(248, 248, 248)',
+                        'color': 'rgb(128,128,128)'
+                    },
+                                {
+                        'if': {
+                            'filter_query': '{full_day_category} = "Sure bet"',
+                            'column_id': 'full_day_category' 
+                        },
+                        'color': 'darkgreen'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{full_day_category} = "Not met"',
+                            'column_id': 'full_day_category' 
+                        },
+                        'color': '#FF4136'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{full_day_category} = "At risk"',
+                            'column_id': 'full_day_category' 
+                        },
+                        'color': '#FF851B'
+                    },
+                    {
+                        'if': {
+                            'filter_query': '{full_day_category} = "On track"',
+                            'column_id': 'full_day_category' 
+                        },
+                        'color': '#2ECC40'
+                    }
+                ],
+                sort_action='native',
+                sort_mode='single',
+            )
+
 app.layout = dbc.Container(
     [
         html.H1(children='Your dashboard'),
-        
+
         # Summary statistics
-        dbc.CardGroup(
+        html.Div(
             [
-                guaranteed_revenue_card,
-                potential_revenue_card,
-                max_approved_revenue_card
+                dbc.CardGroup(
+                    [
+                        guaranteed_revenue_card,
+                        potential_revenue_card,
+                        max_approved_revenue_card
+                    ],
+                ),
             ]
         ),
 
-        dash_table.DataTable(
-            id='child_level',
-            data=df_dashboard.to_dict('records'),
-            columns=[{
-                'id': 'name',
-                'name': 'Child name',
-                'type': 'text'
-            }, {
-                'id': 'case_number',
-                'name': 'Case number',
-                'type': 'text'
-            }, {
-                'id': 'biz_name',
-                'name': 'Business',
-                'type': 'text'
-            }, {
-                'id': 'part_day_category',
-                'name': 'Part day category',
-                'type': 'text'
-            }, {
-                'id': 'part_day_attendance_rate',
-                'name': 'Part day attendance rate',
-                'type': 'numeric',
-                'format': FormatTemplate.percentage(2)
-            }, {
-                'id': 'full_day_category',
-                'name': 'Full day category',
-                'type': 'text'
-            }, {
-                'id': 'full_day_attendance_rate',
-                'name': 'Full day attendance rate',
-                'type': 'numeric',
-                'format': FormatTemplate.percentage(2)
-            }, {
-                'id': 'min_revenue',
-                'name': 'Guaranteed revenue',
-                'type': 'numeric',
-                'format': FormatTemplate.money(2)
-            },  {
-                'id': 'max_achievable_revenue',
-                'name': 'Potential revenue',
-                'type': 'numeric',
-                'format': FormatTemplate.money(2)
-            }, {
-                'id': 'max_monthly_payment',
-                'name': 'Max. revenue approved',
-                'type': 'numeric',
-                'format': FormatTemplate.money(2)
-            }],
-            style_data_conditional=[
-                {
-                    'if': {
-                        'filter_query': '{part_day_category} = "Not enough information"',
-                        'column_id': 'part_day_category'
-                    },
-                    'backgroundColor': 'rgb(248, 248, 248)',
-                    'color': 'rgb(128,128,128)'
-                },
-                {
-                    'if': {
-                        'filter_query': '{part_day_category} = "Sure bet"',
-                        'column_id': 'part_day_category' 
-                    },
-                    'color': 'darkgreen'
-                },
-                {
-                    'if': {
-                        'filter_query': '{part_day_category} = "Not met"',
-                        'column_id': 'part_day_category' 
-                    },
-                    'color': '#FF4136'
-                },
-                {
-                    'if': {
-                        'filter_query': '{part_day_category} = "At risk"',
-                        'column_id': 'part_day_category' 
-                    },
-                    'color': '#FF851B'
-                },
-                {
-                    'if': {
-                        'filter_query': '{part_day_category} = "On track"',
-                        'column_id': 'part_day_category' 
-                    },
-                    'color': '#2ECC40'
-                },
-                {
-                    'if': {
-                        'filter_query': '{full_day_category} = "Not enough information"',
-                        'column_id': 'full_day_category'
-                    },
-                    'backgroundColor': 'rgb(248, 248, 248)',
-                    'color': 'rgb(128,128,128)'
-                },
-                            {
-                    'if': {
-                        'filter_query': '{full_day_category} = "Sure bet"',
-                        'column_id': 'full_day_category' 
-                    },
-                    'color': 'darkgreen'
-                },
-                {
-                    'if': {
-                        'filter_query': '{full_day_category} = "Not met"',
-                        'column_id': 'full_day_category' 
-                    },
-                    'color': '#FF4136'
-                },
-                {
-                    'if': {
-                        'filter_query': '{full_day_category} = "At risk"',
-                        'column_id': 'full_day_category' 
-                    },
-                    'color': '#FF851B'
-                },
-                {
-                    'if': {
-                        'filter_query': '{full_day_category} = "On track"',
-                        'column_id': 'full_day_category' 
-                    },
-                    'color': '#2ECC40'
-                }
-            ],
-            sort_action='native',
-            sort_mode='single',
-        )    
+        html.Br(),
+
+        # Child level table
+        html.Div(
+            child_table
+        )
     ]
 )
 
