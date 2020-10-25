@@ -21,6 +21,8 @@ max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.FLATLY])
 
+server = app.server
+
 # navbar
 navbar = dbc.Navbar(
     dbc.Container(
