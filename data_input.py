@@ -8,7 +8,7 @@ import pandas as pd
 DATA_PATH = Path(__file__).parent.joinpath('data').resolve()
 
 def get_attendance_data():
-    attendance = pd.read_csv(DATA_PATH.joinpath('Attendance_Calculation_Sep-2020.csv'),
+    attendance = pd.read_csv(DATA_PATH.joinpath('Attendance-Calculation-Sep-2020.csv'),
                             usecols=['Child ID',
                                     'Date',
                                     'School account',
@@ -25,31 +25,33 @@ def get_attendance_data():
     return attendance
 
 def get_payment_data():
-    payment = pd.read_csv(DATA_PATH.joinpath('Sample_Billing_Reconciliation.csv'),
+    payment = pd.read_csv(DATA_PATH.joinpath('Sample-Billing-Reconciliation-Sep-2020.csv'),
                             skiprows=1,
-                            usecols=['First name (required)',
-                                    'Last name (required)',
-                                    'Business Name (required)',
-                                    'Case number',
+                            usecols=['Business Name',
+                                    'First name**',
+                                    'Last name**',
+                                    'School age**',
+                                    'Case number**',
+                                    'Full days approved**',
+                                    'Part days (or school days) approved**',
                                     'Maximum monthly payment',
                                     'Total full day rate',
                                     'Total part day rate',
                                     'Co-pay per child',
-                                    'Full days',
-                                    'Part days',
                                     'Child ID'
                                     ])
     # rename columns to standardize column names
-    payment.rename(columns={'First name (required)': 'first_name',
-                            'Last name (required)': 'last_name',
-                            'Business Name (required)': 'biz_name',
-                            'Case number': 'case_number',
+    payment.rename(columns={'Business Name': 'biz_name',
+                            'First name**': 'first_name',
+                            'Last name**': 'last_name',
+                            'School age**': 'school_age',
+                            'Case number**': 'case_number',
+                            'Full days approved**': 'full_days_approved',
+                            'Part days (or school days) approved**': 'part_days_approved',
                             'Maximum monthly payment': 'max_monthly_payment',
                             'Total full day rate': 'full_day_rate',
                             'Total part day rate': 'part_day_rate',
                             'Co-pay per child': 'copay',
-                            'Full days': 'full_days_approved',
-                            'Part days': 'part_days_approved',
                             'Child ID': 'child_id'},
                     inplace=True)
     payment['name'] = payment['first_name'] + ' ' + payment['last_name']
@@ -261,3 +263,8 @@ def get_dashboard_data():
     all_vars_per_child = calculate_attendance_rate(revenues_per_child_df)
     df_dashboard = produce_dashboard_df(all_vars_per_child)
     return df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings
+
+if __name__ == '__main__':
+    attendance = get_attendance_data()
+    payment = get_payment_data()
+
