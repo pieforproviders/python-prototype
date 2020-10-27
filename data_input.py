@@ -101,49 +101,33 @@ def process_attendance_data(attendance_df):
     return attendance_per_child
 
 def process_merged_data(merged_df, month_days, days_left):
+    days_elapsed = month_days - days_left
     # helper function to categorize 
-    def categorize_families_part_day(row, days_left):
-        # part day
+    def categorize_families(row):
         # not enough information
-        if (month_days - days_left)/month_days < 0.5:
+        if days_elapsed / month_days < 0.5:
             return 'Not enough information' 
         # sure bet
-        elif row['family_part_days_attended'] >= (ATTENDANCE_THRESHOLD * row['family_part_days_approved']):
+        elif (row['family_total_days_attended'] 
+                >= (ATTENDANCE_THRESHOLD * row['family_total_days_approved'])):
             return 'Sure bet'
         # not met
-        elif ((ATTENDANCE_THRESHOLD * row['family_part_days_approved'] - row['family_part_days_attended'])
+        elif ((ATTENDANCE_THRESHOLD * row['family_total_days_approved']
+                - row['family_total_days_attended'])
                 > days_left):
             return 'Not met'
         # at risk (using percentage rule based on adjusted attendance rate)
-        elif (row['family_part_days_attended'] 
-                / (((month_days - days_left) / month_days) * row['family_part_days_approved']) < ATTENDANCE_THRESHOLD):
+        elif ((row['family_total_days_attended'] 
+                / ((days_elapsed / month_days) * row['family_total_days_approved']))
+                < ATTENDANCE_THRESHOLD):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
             return 'On track'
-
-    def categorize_families_full_day(row, days_left):
-        # not enough informaton
-        if (month_days - days_left)/month_days < 0.5:
-            return 'Not enough information' 
-        # sure bet
-        elif row['family_full_days_attended'] >= (ATTENDANCE_THRESHOLD * row['family_full_days_approved']):
-            return 'Sure bet'
-        # not met
-        elif ((ATTENDANCE_THRESHOLD * row['family_full_days_approved'] - row['family_full_days_attended'])
-            > days_left):
-            return 'Not met'
-        # at risk (using percentage rule at 50% of month)
-        elif (row['family_full_days_attended'] 
-                / (((month_days - days_left) / month_days) * row['family_full_days_approved']) < ATTENDANCE_THRESHOLD):
-            return 'At risk'
-        # on track (all others not falling in above categories)
-        else:
-            return 'On track' 
         # todo: check that categories are mutually exclusive
 
     # calculate family level days approved and attended
-    merged_df['family_full_days_approved'] = (merged_df.groupby('case_number')['full_days_approved']
+    merged_df['family_full_days_approved'] = (merged_df.groupby('case_number')            ['full_days_approved']
                                                         .transform(lambda x: np.sum(x)))
     merged_df['family_full_days_attended'] = (merged_df.groupby('case_number')['full_days_attended']
                                                         .transform(lambda x: np.sum(x)))               
@@ -152,12 +136,14 @@ def process_merged_data(merged_df, month_days, days_left):
     merged_df['family_part_days_attended'] = (merged_df.groupby('case_number')['part_days_attended']
                                                         .transform(lambda x: np.sum(x)))  
 
+    # calculate total family days
+    merged_df['family_total_days_approved'] = (merged_df['family_full_days_approved']
+                                                + merged_df['family_part_days_approved'])
+    merged_df['family_total_days_attended'] = (merged_df['family_full_days_attended']
+                                                + merged_df['family_part_days_attended'])
+    
     # categorize families
-    merged_df['part_day_category'] = merged_df.apply(categorize_families_part_day,
-                                                    args=[days_left],
-                                                    axis=1)
-    merged_df['full_day_category'] = merged_df.apply(categorize_families_full_day,
-                                                    args=[days_left],
+    merged_df['attendance_category'] = merged_df.apply(categorize_families,
                                                     axis=1)
     return merged_df
 
@@ -269,4 +255,23 @@ def get_dashboard_data():
 if __name__ == '__main__':
     attendance = get_attendance_data()
     payment = get_payment_data()
+    # subset attendance to half month to simulate having onlf half month data
+    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
+
+    # get latest date in attendance data
+    latest_date = attendance_half['date'].max().strftime('%b %d %Y')
+
+    # calculate days in month and days left in month
+    month_days, days_left = calculate_month_days(attendance_half)
+
+    # check if data is insufficient
+    is_data_insufficient = (month_days - days_left)/month_days < 0.5
+
+    # calculate number of days required for at-risk warnings to be shown
+    days_req_for_warnings = math.ceil(month_days/2)
+
+    # process data for dashboard
+    attendance_processed = process_attendance_data(attendance_half)
+    payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
+    payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
 
