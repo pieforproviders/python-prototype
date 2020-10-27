@@ -5,7 +5,9 @@ import math
 import numpy as np
 import pandas as pd
 
+# constants
 DATA_PATH = Path(__file__).parent.joinpath('data').resolve()
+ATTENDANCE_THRESHOLD = 0.495
 
 def get_attendance_data():
     attendance = pd.read_csv(DATA_PATH.joinpath('Attendance-Calculation-Sep-2020.csv'),
@@ -106,15 +108,15 @@ def process_merged_data(merged_df, month_days, days_left):
         if (month_days - days_left)/month_days < 0.5:
             return 'Not enough information' 
         # sure bet
-        elif row['family_part_days_attended'] >= (0.795 * row['family_part_days_approved']):
+        elif row['family_part_days_attended'] >= (ATTENDANCE_THRESHOLD * row['family_part_days_approved']):
             return 'Sure bet'
         # not met
-        elif ((0.795 * row['family_part_days_approved'] - row['family_part_days_attended'])
+        elif ((ATTENDANCE_THRESHOLD * row['family_part_days_approved'] - row['family_part_days_attended'])
                 > days_left):
             return 'Not met'
         # at risk (using percentage rule based on adjusted attendance rate)
         elif (row['family_part_days_attended'] 
-                / (((month_days - days_left) / month_days) * row['family_part_days_approved']) < 0.795):
+                / (((month_days - days_left) / month_days) * row['family_part_days_approved']) < ATTENDANCE_THRESHOLD):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
@@ -125,15 +127,15 @@ def process_merged_data(merged_df, month_days, days_left):
         if (month_days - days_left)/month_days < 0.5:
             return 'Not enough information' 
         # sure bet
-        elif row['family_full_days_attended'] >= (0.795 * row['family_full_days_approved']):
+        elif row['family_full_days_attended'] >= (ATTENDANCE_THRESHOLD * row['family_full_days_approved']):
             return 'Sure bet'
         # not met
-        elif ((0.795 * row['family_full_days_approved'] - row['family_full_days_attended'])
+        elif ((ATTENDANCE_THRESHOLD * row['family_full_days_approved'] - row['family_full_days_attended'])
             > days_left):
             return 'Not met'
         # at risk (using percentage rule at 50% of month)
         elif (row['family_full_days_attended'] 
-                / (((month_days - days_left) / month_days) * row['family_full_days_approved']) < 0.795):
+                / (((month_days - days_left) / month_days) * row['family_full_days_approved']) < ATTENDANCE_THRESHOLD):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
