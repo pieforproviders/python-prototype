@@ -127,7 +127,7 @@ def process_merged_data(merged_df, month_days, days_left):
         # todo: check that categories are mutually exclusive
 
     # calculate family level days approved and attended
-    merged_df['family_full_days_approved'] = (merged_df.groupby('case_number')            ['full_days_approved']
+    merged_df['family_full_days_approved'] = (merged_df.groupby('case_number')['full_days_approved']
                                                         .transform(lambda x: np.sum(x)))
     merged_df['family_full_days_attended'] = (merged_df.groupby('case_number')['full_days_attended']
                                                         .transform(lambda x: np.sum(x)))               
