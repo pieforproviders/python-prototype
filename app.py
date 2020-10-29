@@ -163,7 +163,6 @@ child_table = dash_table.DataTable(
                 ],
                 style_table=
                     {
-                        'overflowX': 'scroll',
                         'padding': '20px'
                     },
                 sort_action='native',
