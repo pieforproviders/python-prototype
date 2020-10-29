@@ -176,7 +176,8 @@ app.layout = html.Div(
             [   
                 html.H1(children='Your dashboard'),
 
-                html.H2('Estimates as of ' + latest_date),
+                html.H2('Estimates as of ' + latest_date,
+                        style={'font-size': '1.5rem'}),
 
                 html.Div(
                     dbc.Alert('At-risk case warnings will be available with '
