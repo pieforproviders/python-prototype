@@ -14,7 +14,7 @@ from data_input import get_dashboard_data
 # load data
 df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
 min_revenue_sum = df_dashboard['min_revenue'].sum()
-max_achievable_revenue_sum = df_dashboard['max_achievable_revenue'].sum()
+potential_revenue_sum = df_dashboard['potential_revenue'].sum()
 max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 
 # dash app
@@ -62,7 +62,7 @@ potential_revenue_card = dbc.Card(
         dbc.CardBody(
             [
                 html.H4(
-                    '$' + str(round(max_approved_revenue_sum, 2)), className="card-title font-weight-bold"
+                    '$' + str(round(potential_revenue_sum, 2)), className="card-title font-weight-bold"
                 )
             ]
         )  
@@ -75,7 +75,7 @@ max_approved_revenue_card = dbc.Card(
         dbc.CardBody(
             [
                 html.H4(
-                    '$' + str(round(max_achievable_revenue_sum, 2)), className="card-title font-weight-bold"
+                    '$' + str(round(max_approved_revenue_sum, 2)), className="card-title font-weight-bold"
                 )
             ]
         )  
@@ -99,30 +99,21 @@ child_table = dash_table.DataTable(
                     'name': 'Business',
                     'type': 'text'
                 }, {
-                    'id': 'part_day_category',
-                    'name': 'Part day category',
+                    'id': 'attendance_category',
+                    'name': 'Attendance category',
                     'type': 'text'
                 }, {
-                    'id': 'part_day_attendance_rate',
-                    'name': 'Part day attendance rate',
+                    'id': 'attendance_rate',
+                    'name': 'Attendance rate',
                     'type': 'numeric',
-                    'format': FormatTemplate.percentage(2)
-                }, {
-                    'id': 'full_day_category',
-                    'name': 'Full day category',
-                    'type': 'text'
-                }, {
-                    'id': 'full_day_attendance_rate',
-                    'name': 'Full day attendance rate',
-                    'type': 'numeric',
-                    'format': FormatTemplate.percentage(2)
+                    'format': FormatTemplate.percentage(0)
                 }, {
                     'id': 'min_revenue',
                     'name': 'Guaranteed revenue',
                     'type': 'numeric',
                     'format': FormatTemplate.money(2)
                 },  {
-                    'id': 'max_achievable_revenue',
+                    'id': 'potential_revenue',
                     'name': 'Potential revenue',
                     'type': 'numeric',
                     'format': FormatTemplate.money(2)
@@ -135,73 +126,37 @@ child_table = dash_table.DataTable(
                 style_data_conditional=[
                     {
                         'if': {
-                            'filter_query': '{part_day_category} = "Not enough information"',
-                            'column_id': 'part_day_category'
+                            'filter_query': '{attendance_category} = "Not enough information"',
+                            'column_id': 'attendance_category'
                         },
                         'backgroundColor': 'rgb(248, 248, 248)',
                         'color': 'rgb(128,128,128)'
                     },
                     {
                         'if': {
-                            'filter_query': '{part_day_category} = "Sure bet"',
-                            'column_id': 'part_day_category' 
+                            'filter_query': '{attendance_category} = "Sure bet"',
+                            'column_id': 'attendance_category' 
                         },
                         'color': 'darkgreen'
                     },
                     {
                         'if': {
-                            'filter_query': '{part_day_category} = "Not met"',
-                            'column_id': 'part_day_category' 
+                            'filter_query': '{attendance_category} = "Not met"',
+                            'column_id': 'attendance_category' 
                         },
                         'color': '#FF4136'
                     },
                     {
                         'if': {
-                            'filter_query': '{part_day_category} = "At risk"',
-                            'column_id': 'part_day_category' 
+                            'filter_query': '{attendance_category} = "At risk"',
+                            'column_id': 'attendance_category' 
                         },
                         'color': '#FF851B'
                     },
                     {
                         'if': {
-                            'filter_query': '{part_day_category} = "On track"',
-                            'column_id': 'part_day_category' 
-                        },
-                        'color': '#2ECC40'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{full_day_category} = "Not enough information"',
-                            'column_id': 'full_day_category'
-                        },
-                        'backgroundColor': 'rgb(248, 248, 248)',
-                        'color': 'rgb(128,128,128)'
-                    },
-                                {
-                        'if': {
-                            'filter_query': '{full_day_category} = "Sure bet"',
-                            'column_id': 'full_day_category' 
-                        },
-                        'color': 'darkgreen'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{full_day_category} = "Not met"',
-                            'column_id': 'full_day_category' 
-                        },
-                        'color': '#FF4136'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{full_day_category} = "At risk"',
-                            'column_id': 'full_day_category' 
-                        },
-                        'color': '#FF851B'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{full_day_category} = "On track"',
-                            'column_id': 'full_day_category' 
+                            'filter_query': '{attendance_category} = "On track"',
+                            'column_id': 'attendance_category' 
                         },
                         'color': '#2ECC40'
                     }

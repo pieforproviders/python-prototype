@@ -108,23 +108,27 @@ def process_merged_data(merged_df, month_days, days_left):
         if days_elapsed / month_days < 0.5:
             return 'Not enough information' 
         # sure bet
-        elif (row['family_total_days_attended'] 
-                >= (ATTENDANCE_THRESHOLD * row['family_total_days_approved'])):
+        elif (row['family_total_days_attended'] / row['family_total_days_approved']
+                >= ATTENDANCE_THRESHOLD):
             return 'Sure bet'
         # not met
-        elif ((ATTENDANCE_THRESHOLD * row['family_total_days_approved']
-                - row['family_total_days_attended'])
-                > days_left):
+        elif (ATTENDANCE_THRESHOLD * row['family_total_days_approved']
+                - row['family_total_days_attended']
+                > row['family_children'] * days_left):
             return 'Not met'
         # at risk (using percentage rule based on adjusted attendance rate)
-        elif ((row['family_total_days_attended'] 
-                / ((days_elapsed / month_days) * row['family_total_days_approved']))
+        elif (row['family_total_days_attended'] 
+                / ((days_elapsed / month_days) * row['family_total_days_approved'])
                 < ATTENDANCE_THRESHOLD):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
             return 'On track'
         # todo: check that categories are mutually exclusive
+
+    # calculate number of children in the family
+    merged_df['family_children'] = (merged_df.groupby('case_number')['child_id']
+                                             .transform('count'))
 
     # calculate family level days approved and attended
     merged_df['family_full_days_approved'] = (merged_df.groupby('case_number')['full_days_approved']
@@ -149,63 +153,49 @@ def process_merged_data(merged_df, month_days, days_left):
 
 def calculate_revenues_per_child(merged_df, days_left):
     # helper functions to calculate revenue
-    def calculate_max_achievable_revenue(row, days_left):
-        # max achievable revenue is approved days * rate unless threshold is already not met
-        # full day
-        if row['full_day_category'] == 'Not met':
-            full_day_max_revenue = (row['full_days_attended'] + days_left) * row['full_day_rate']  
+    def calculate_potential_revenue(row, days_left):
+        # potential revenue is approved days * rate unless threshold is already not met
+        if row['attendance_category'] == 'Not met':
+            full_days_difference = row['full_days_approved'] - row['full_days_attended']
+            part_days_difference = row['part_days_approved'] - row['part_days_attended']
+            potential_revenue_full_days = np.min(days_left, full_days_difference)
+            if full_days_difference < days_left:
+                potential_revenue_part_days = np.min(days_left - full_days_difference,
+                                                     part_days_difference)
+            else:
+                potential_revenue_part_days = 0
+            full_day_potential_revenue = ((row['full_days_attended'] + potential_revenue_full_days)
+                                            * row['full_day_rate'])
+            part_day_potential_revenue = ((row['part_days_attended'] + potential_revenue_part_days)
+                                            * row['part_day_rate'])
         else:
-            full_day_max_revenue = row['full_days_approved'] * row['full_day_rate']
-        # part day
-        if row['part_day_category'] == 'Not met':
-            part_day_max_revenue = (row['part_days_attended'] + days_left) * row['part_day_rate']  
-        else:
-            part_day_max_revenue = row['part_days_approved'] * row['part_day_rate']
-        return full_day_max_revenue + part_day_max_revenue - row['copay']
+            full_day_potential_revenue = row['full_days_approved'] * row['full_day_rate']
+            part_day_potential_revenue = row['part_days_approved'] * row['part_day_rate']
+        return full_day_potential_revenue + part_day_potential_revenue - row['copay']
 
     def calculate_min_revenue(row):
         # min revenue is attended days * rate, unless sure bet
         # full day
-        if row['full_day_category'] == 'Sure bet':
+        if row['attendance_category'] == 'Sure bet':
             full_day_min_revenue = row['full_days_approved'] * row['full_day_rate']
-        else:
-            full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
-        # part day
-        if row['part_day_category'] == 'Sure bet':
             part_day_min_revenue = row['part_days_approved'] * row['part_day_rate']
         else:
+            full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
             part_day_min_revenue = row['part_days_attended'] * row['part_day_rate'] 
         return full_day_min_revenue + part_day_min_revenue - row['copay']
 
-    # leave out in danger revenues for now
-    # def calculate_in_danger_revenue(row):
-    #   if row['full_day_category'] == 'At risk':
-    #     full_in_danger_revenue = ((row['full_days_approved'] - row['full_days_attended'])
-    #                             * row['full_day_rate'])
-    #   else:
-    #     full_in_danger_revenue = 0
-    #   if row['part_day_category'] == 'At risk':
-    #     part_in_danger_revenue = ((row['part_days_approved'] - row['part_days_attended'])
-    #                             * row['part_day_rate'])
-    #   else:
-    #     part_in_danger_revenue = 0
-    #   return full_in_danger_revenue + part_in_danger_revenue
-
     # calculate revenues at child level
-    merged_df['max_achievable_revenue'] = merged_df.apply(calculate_max_achievable_revenue,
+    merged_df['potential_revenue'] = merged_df.apply(calculate_potential_revenue,
                                                             args=[days_left],
                                                             axis=1)
     merged_df['min_revenue'] = merged_df.apply(calculate_min_revenue,
                                                 axis=1)
-    # merged_df['in_danger_revenue'] = merged_df.apply(calculate_in_danger_revenue, axis=1)
 
     return merged_df
 
 def calculate_attendance_rate(df):
     # part day
-    df['part_day_attendance_rate'] = df['family_part_days_attended'] / df['family_part_days_approved']
-    # full day
-    df['full_day_attendance_rate'] = df['family_full_days_attended'] / df['family_full_days_approved']
+    df['attendance_rate'] = df['family_total_days_attended'] / df['family_total_days_approved']
     return df
 
 def produce_dashboard_df(df):
@@ -213,12 +203,10 @@ def produce_dashboard_df(df):
     cols_to_keep = ['name',
                     'case_number',
                     'biz_name',
-                    'part_day_category',
-                    'part_day_attendance_rate',
-                    'full_day_category',
-                    'full_day_attendance_rate',
+                    'attendance_category',
+                    'attendance_rate',
                     'min_revenue',
-                    'max_achievable_revenue',
+                    'potential_revenue',
                     'max_monthly_payment']
     df_sub = df.loc[:, cols_to_keep].copy()
     return df_sub
@@ -274,4 +262,6 @@ if __name__ == '__main__':
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
     payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
+    revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
+                                                        days_left)
 
