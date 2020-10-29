@@ -30,10 +30,11 @@ navbar = dbc.Navbar(
             # Use row and col to control vertical alignment of logo / brand
             dbc.Row(
                 [
-                    dbc.Col(html.Img(src="", height="30px")),
-                    dbc.Col(dbc.NavbarBrand("Pie for Providers", className="ml-2")),
+                    dbc.Col(
+                            html.Img(src='/assets/pie_logo.png', height='50px')
+                        ),
                 ],
-                align="center",
+                align='center',
                 no_gutters=True,
             )
         ],
