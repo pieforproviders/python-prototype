@@ -17,6 +17,7 @@ from data_input import get_dashboard_data
 # load environment variables
 username = os.environ.get('USERNAME')
 password = os.environ.get('PASSWORD')
+ga_tracking_id = os.environ.get('GA_TRACKING_ID')
 
 # load data
 df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
@@ -180,6 +181,15 @@ child_table = dash_table.DataTable(
                 sort_mode='single',
             )
 
+google_analytics = f"""
+    (function(i,s,o,g,r,a,m){{i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){{
+(i[r].q=i[r].q||[]).push(arguments)}},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+}})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-{ga_tracking_id}-1', 'auto');
+ga('send', 'pageview');
+    """
+
 app.layout = html.Div(
     [navbar,
         dbc.Container(
@@ -217,7 +227,11 @@ app.layout = html.Div(
                     child_table
                 )
             ]
-        )   
+        ),
+        html.Script(
+            google_analytics,
+            type='text/javascript'
+        )      
     ]
 )
 
