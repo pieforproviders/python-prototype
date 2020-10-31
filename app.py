@@ -1,15 +1,22 @@
+from dotenv import load_dotenv
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 import dash
+import dash_auth
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_table
 import dash_table.FormatTemplate as FormatTemplate
 
 from data_input import get_dashboard_data
+
+# load environment variables
+username = os.environ.get('USERNAME')
+password = os.environ.get('PASSWORD')
 
 # load data
 df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
@@ -20,7 +27,10 @@ max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 # dash app
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.FLATLY])
-
+auth = dash_auth.BasicAuth(
+    app,
+    {username: password}
+)
 server = app.server
 
 # navbar
