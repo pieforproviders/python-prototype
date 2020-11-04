@@ -79,21 +79,21 @@ def make_revenue_chart(df):
                     name='Minimum revenue',
                     y=['revenue'],
                     x=[min_revenue_sum],
-                    width=[0.1],
+                    width=[0.4],
                     orientation='h',
                     marker_color='rgb(0,110,160)')
     trace_potential = go.Bar(
                         name='Potential revenue',
                         y=['revenue'],
                         x=[min_potential_delta],
-                        width=[0.1],
+                        width=[0.4],
                         orientation='h',
                         marker_color='rgb(56,178,234)')
     trace_max = go.Bar(
                     name='Max. revenue approved',
                     y=['revenue'],
                     x=[potential_max_delta],
-                    width=[0.1],
+                    width=[0.4],
                     orientation='h',
                     marker_color='rgb(204,239,255)')
 
@@ -107,12 +107,17 @@ def make_revenue_chart(df):
                        'visible':False,
                        'showticklabels':False,
                        'fixedrange':True},
-
-                plot_bgcolor='rgb(0,255,255)',
-                title={'text': 'Total Revenue'},
+                plot_bgcolor='rgb(255,255,255)',
+                margin={
+                    'l':0,
+                    'r':0,
+                    't':0,
+                    'b':0},
                 legend={'orientation':'h',
                         'traceorder':'normal'},
-                hovermode=False
+                hovermode=False,
+                autosize=False,
+                height=100
                 )
     fig = go.Figure(data=data, layout=layout)
     return fig

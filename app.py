@@ -62,7 +62,8 @@ navbar = dbc.Navbar(
 attendance_summary_card = dbc.Card(
     [
         dbc.CardBody(
-            [
+            [   html.H3('Total Attendance',
+                        style={'font-size': '1.5rem'}),
                 summary_table
             ]
         )  
@@ -73,6 +74,8 @@ revenue_summary_card = dbc.Card(
     [
         dbc.CardBody(
             [
+                html.H3('Total Revenue',
+                        style={'font-size': '1.5rem'}),
                 dcc.Graph(
                     figure=revenue_chart,
                     config={'displayModeBar':False})
@@ -141,11 +144,18 @@ app.layout = html.Div(
                 # Summary statistics
                 html.Div(
                     [
-                        dbc.CardGroup(
+                        dbc.Row(
                             [
-                                attendance_summary_card,
-                                revenue_summary_card,
+                                dbc.Col(
+                                    attendance_summary_card,
+                                    width=4
+                                ),
+                                dbc.Col(
+                                    revenue_summary_card,
+                                    width=8
+                                )
                             ],
+                            no_gutters=True
                         ),
                     ]
                 ),
