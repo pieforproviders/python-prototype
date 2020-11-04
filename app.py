@@ -9,10 +9,9 @@ import dash
 import dash_auth
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash_table
-import dash_table.FormatTemplate as FormatTemplate
 
 from data_input import get_dashboard_data
+from make_figures import make_table 
 
 # load environment variables
 username = os.environ.get('USERNAME')
@@ -23,6 +22,9 @@ df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_das
 min_revenue_sum = df_dashboard['min_revenue'].sum()
 potential_revenue_sum = df_dashboard['potential_revenue'].sum()
 max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
+
+# figures
+child_table = make_table(df_dashboard)
 
 # dash app
 app = dash.Dash(__name__,
@@ -93,92 +95,6 @@ max_approved_revenue_card = dbc.Card(
     ]
 )
 
-# child level table
-child_table = dash_table.DataTable(
-                id='child_level',
-                data=df_dashboard.to_dict('records'),
-                columns=[{
-                    'id': 'name',
-                    'name': 'Child name',
-                    'type': 'text'
-                }, {
-                    'id': 'case_number',
-                    'name': 'Case number',
-                    'type': 'text'
-                }, {
-                    'id': 'biz_name',
-                    'name': 'Business',
-                    'type': 'text'
-                }, {
-                    'id': 'attendance_category',
-                    'name': 'Attendance category',
-                    'type': 'text'
-                }, {
-                    'id': 'attendance_rate',
-                    'name': 'Attendance rate',
-                    'type': 'numeric',
-                    'format': FormatTemplate.percentage(0)
-                }, {
-                    'id': 'min_revenue',
-                    'name': 'Guaranteed revenue',
-                    'type': 'numeric',
-                    'format': FormatTemplate.money(2)
-                },  {
-                    'id': 'potential_revenue',
-                    'name': 'Potential revenue',
-                    'type': 'numeric',
-                    'format': FormatTemplate.money(2)
-                }, {
-                    'id': 'max_monthly_payment',
-                    'name': 'Max. revenue approved',
-                    'type': 'numeric',
-                    'format': FormatTemplate.money(2)
-                }],
-                style_data_conditional=[
-                    {
-                        'if': {
-                            'filter_query': '{attendance_category} = "Not enough information"',
-                            'column_id': 'attendance_category'
-                        },
-                        'backgroundColor': 'rgb(248, 248, 248)',
-                        'color': 'rgb(128,128,128)'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{attendance_category} = "Sure bet"',
-                            'column_id': 'attendance_category' 
-                        },
-                        'color': 'darkgreen'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{attendance_category} = "Not met"',
-                            'column_id': 'attendance_category' 
-                        },
-                        'color': '#FF4136'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{attendance_category} = "At risk"',
-                            'column_id': 'attendance_category' 
-                        },
-                        'color': '#FF851B'
-                    },
-                    {
-                        'if': {
-                            'filter_query': '{attendance_category} = "On track"',
-                            'column_id': 'attendance_category' 
-                        },
-                        'color': '#2ECC40'
-                    }
-                ],
-                style_table=
-                    {
-                        'padding': '20px'
-                    },
-                sort_action='native',
-                sort_mode='single',
-            )
 
 app.layout = html.Div(
     [navbar,
