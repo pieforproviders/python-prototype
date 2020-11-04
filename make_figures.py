@@ -76,7 +76,7 @@ def make_revenue_chart(df):
     potential_max_delta = max_approved_revenue_sum - potential_revenue_sum
 
     trace_min = go.Bar(
-                    name='Minimum revenue',
+                    name='Guaranteed revenue',
                     y=['revenue'],
                     x=[min_revenue_sum],
                     width=[0.4],
