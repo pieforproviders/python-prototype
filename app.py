@@ -7,11 +7,12 @@ import pandas as pd
 
 import dash
 import dash_auth
-import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
 
 from data_input import get_dashboard_data
-from make_figures import make_table 
+from make_figures import make_table, make_revenue_chart 
 
 # load environment variables
 username = os.environ.get('USERNAME')
@@ -25,6 +26,7 @@ max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 
 # figures
 child_table = make_table(df_dashboard)
+revenue_chart = make_revenue_chart(df_dashboard)
 
 # dash app
 app = dash.Dash(__name__,
@@ -56,6 +58,18 @@ navbar = dbc.Navbar(
 )
 
 # summary cards
+revenue_summary_card = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                dcc.Graph(
+                    figure=revenue_chart,
+                    config={'displayModeBar':False})
+            ]
+        )  
+    ]
+)
+
 guaranteed_revenue_card = dbc.Card(
     [
         dbc.CardHeader("Guaranteed revenue"),
@@ -118,9 +132,7 @@ app.layout = html.Div(
                     [
                         dbc.CardGroup(
                             [
-                                guaranteed_revenue_card,
-                                potential_revenue_card,
-                                max_approved_revenue_card
+                                revenue_summary_card,
                             ],
                         ),
                     ]
