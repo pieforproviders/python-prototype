@@ -2,8 +2,68 @@ import numpy as np
 import pandas as pd
 
 import dash_table
+from dash_table.Format import Format
 import dash_table.FormatTemplate as FormatTemplate
 import plotly.graph_objects as go
+
+# attendance summary
+def make_attendance_table(df):
+    # count children in attendance category
+    # using shape[0] to count rows and return an int
+    sure_bet_count = df[df['attendance_category'] == 'Sure bet'].shape[0]
+    at_risk_count = df[df['attendance_category'] == 'At risk'].shape[0]
+    not_met_count = df[df['attendance_category'] == 'Not met'].shape[0]
+    on_track_count = df[df['attendance_category'] == 'On track'].shape[0]
+    total_count = df['attendance_category'].shape[0]
+
+    # calculate percentage of children in each category
+    sure_bet_pct = sure_bet_count / total_count
+    at_risk_pct = at_risk_count / total_count
+    not_met_pct = not_met_count / total_count
+    on_track_pct = on_track_count / total_count
+
+    # make table
+    label_col = ['Sure bet',
+                 'On Track',
+                 'At Risk',
+                 'Not Met']
+    pct_col = [sure_bet_pct,
+               on_track_pct,
+               at_risk_pct,
+               not_met_pct]
+    count_col = [sure_bet_count,
+                 on_track_count,
+                 at_risk_count,
+                 not_met_count]
+    df_table = pd.DataFrame({
+        'attendance_category': label_col,
+        'percentage': pct_col,
+        'count': count_col}) 
+
+    table = dash_table.DataTable(
+        id='summary',
+        columns=[{
+                'id': 'attendance_category',
+                'name': 'Attendance Category',
+                'type': 'text'
+            }, {
+                'id': 'percentage',
+                'name': 'Percentage',
+                'type': 'numeric',
+                'format': FormatTemplate.percentage(0)
+            }, {
+                'id': 'count',
+                'name': 'Count',
+                'type': 'numeric',
+                'format': Format(
+                    precision=0
+                )
+            }
+        ],
+        data=df_table.to_dict('records'),
+        style_as_list_view=True
+    )
+    return table
 
 # revenue barchart
 def make_revenue_chart(df):
@@ -150,8 +210,9 @@ if __name__ == '__main__':
     from data_input import get_dashboard_data
     df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
 
-    fig = make_revenue_chart(df_dashboard)
-    fig.show()
-
+    # fig = make_revenue_chart(df_dashboard)
+    # fig.show()
+    
+    make_attendance_table(df_dashboard)
 
 

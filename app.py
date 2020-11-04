@@ -12,7 +12,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from data_input import get_dashboard_data
-from make_figures import make_table, make_revenue_chart 
+from make_figures import make_table, make_revenue_chart, make_attendance_table 
 
 # load environment variables
 username = os.environ.get('USERNAME')
@@ -27,6 +27,7 @@ max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 # figures
 child_table = make_table(df_dashboard)
 revenue_chart = make_revenue_chart(df_dashboard)
+summary_table = make_attendance_table(df_dashboard)
 
 # dash app
 app = dash.Dash(__name__,
@@ -58,6 +59,16 @@ navbar = dbc.Navbar(
 )
 
 # summary cards
+attendance_summary_card = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                summary_table
+            ]
+        )  
+    ]
+)
+
 revenue_summary_card = dbc.Card(
     [
         dbc.CardBody(
@@ -132,6 +143,7 @@ app.layout = html.Div(
                     [
                         dbc.CardGroup(
                             [
+                                attendance_summary_card,
                                 revenue_summary_card,
                             ],
                         ),
