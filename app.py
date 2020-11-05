@@ -84,46 +84,6 @@ revenue_summary_card = dbc.Card(
     ]
 )
 
-guaranteed_revenue_card = dbc.Card(
-    [
-        dbc.CardHeader("Guaranteed revenue"),
-        dbc.CardBody(
-            [
-                html.H4(
-                    '$' + str(round(min_revenue_sum, 2)), className="card-title font-weight-bold"
-                )
-            ]
-        )  
-    ]
-)
-
-potential_revenue_card = dbc.Card(
-    [
-        dbc.CardHeader("Potential revenue"),
-        dbc.CardBody(
-            [
-                html.H4(
-                    '$' + str(round(potential_revenue_sum, 2)), className="card-title font-weight-bold"
-                )
-            ]
-        )  
-    ]
-)
-
-max_approved_revenue_card = dbc.Card(
-    [
-        dbc.CardHeader("Max. approved revenue"),
-        dbc.CardBody(
-            [
-                html.H4(
-                    '$' + str(round(max_approved_revenue_sum, 2)), className="card-title font-weight-bold"
-                )
-            ]
-        )  
-    ]
-)
-
-
 app.layout = html.Div(
     [navbar,
         dbc.Container(
