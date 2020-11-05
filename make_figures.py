@@ -76,21 +76,27 @@ def make_revenue_chart(df):
     potential_max_delta = max_approved_revenue_sum - potential_revenue_sum
 
     trace_min = go.Bar(
-                    name='Guaranteed revenue',
+                    name=('Guaranteed revenue <br>'
+                        + '$' + str(round(min_revenue_sum))
+                    ),
                     y=['revenue'],
                     x=[min_revenue_sum],
                     width=[0.4],
                     orientation='h',
                     marker_color='rgb(0,110,160)')
     trace_potential = go.Bar(
-                        name='Potential revenue',
+                        name=('Potential revenue <br>' 
+                            + '$' + str(round(potential_revenue_sum))
+                        ),
                         y=['revenue'],
                         x=[min_potential_delta],
                         width=[0.4],
                         orientation='h',
                         marker_color='rgb(56,178,234)')
     trace_max = go.Bar(
-                    name='Max. revenue approved',
+                    name=('Max. revenue approved <br>'
+                        + '$' + str(round(max_approved_revenue_sum))
+                    ),
                     y=['revenue'],
                     x=[potential_max_delta],
                     width=[0.4],
