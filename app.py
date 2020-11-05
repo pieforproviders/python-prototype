@@ -183,6 +183,25 @@ accordion = html.Div(
     [attendance_copy_card, revenue_copy_card], className='accordion'
 )
 
+# email copy
+email_copy = html.Div(
+    html.P(
+        [
+            'For the most accurate estimates, email all your attendance records for this month to ',
+            html.A(
+                'info@pieforproviders.com',
+                href='mailto:info@pieforproviders.com',
+                target="_blank"),
+            '. You can pull a report from software you already use, ',
+            html.A(
+                'or fill this spreadsheet.',
+                href='https://docs.google.com/spreadsheets/d/1OsNy6BgH09dDf2PlZ32qT7mgJMSmd6sRqxH1bpfccgI/edit#gid=246587558',
+                target="_blank"
+                )
+        ]
+    )
+)
+
 
 app.layout = html.Div(
     [
@@ -229,7 +248,8 @@ app.layout = html.Div(
                 # Child level table
                 html.Div(
                     child_table
-                )
+                ),
+                email_copy
             ]
         )   
     ]
