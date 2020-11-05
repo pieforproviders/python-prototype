@@ -101,7 +101,39 @@ attendance_copy_card = dbc.Card(
         ),
         dbc.Collapse(
             dbc.CardBody(
-                'Attendance copy'
+                [   
+                    html.P(
+                        [
+                            html.Strong('Sure bet: '),
+                            html.Span('attendance rate met - maximum payment expected!')
+                        ]
+                    ),
+                    html.P(
+                        [
+                            html.Strong('On track: '),
+                            html.Span('likely to meet attendance rate for full payment')
+                        ]
+                    ),
+                    html.P(
+                        [
+                            html.Strong('At risk: '),
+                            html.Span('may not meet attendance rate for full payment - encourage family to attend')
+                        ]
+                    ),
+                     html.P(
+                        [
+                            html.Strong('Not met: '),
+                            html.Span("full payment not possible; you'll get paid for days attended only")
+                        ]
+                    ),  
+                     html.P(
+                        [
+                            html.Strong('Not enough info: '),
+                            html.Span('email us ' + str(days_req_for_warnings) 
+                                        + '+ days of attendance records to get projections')
+                        ]
+                    )
+                ]
             ),
             id='collapse-1'
         )
@@ -121,7 +153,26 @@ revenue_copy_card = dbc.Card(
         ),
         dbc.Collapse(
             dbc.CardBody(
-                'Revenue copy'
+                [
+                    html.P(
+                        [
+                            html.Strong('Guaranteed revenue: '),
+                            html.Span('based on days already attended')
+                        ]
+                    ),
+                    html.P(
+                        [
+                            html.Strong('Potential revenue: '),
+                            html.Span('based on attendance expected for rest of the month')
+                        ]
+                    ),
+                    html.P(
+                        [
+                            html.Strong('Max. approved revenue: '),
+                            html.Span('if all children meet 80% attendance rate')
+                        ]
+                    )
+                ]
             ),
             id='collapse-2'
         )
