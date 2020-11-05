@@ -8,19 +8,24 @@ import plotly.graph_objects as go
 
 # attendance summary
 def make_attendance_table(df):
-    # count children in attendance category
-    # using shape[0] to count rows and return an int
-    sure_bet_count = df[df['attendance_category'] == 'Sure bet'].shape[0]
-    at_risk_count = df[df['attendance_category'] == 'At risk'].shape[0]
-    not_met_count = df[df['attendance_category'] == 'Not met'].shape[0]
-    on_track_count = df[df['attendance_category'] == 'On track'].shape[0]
-    total_count = df['attendance_category'].shape[0]
+    # check if not enough info
+    if df.loc[0, 'attendance_category'] == 'Not enough information':
+        sure_bet_count, at_risk_count, not_met_count, on_track_count = [None] * 4
+        sure_bet_pct, at_risk_pct, not_met_pct, on_track_pct = [None] * 4
+    else:
+        # count children in attendance category
+        # using shape[0] to count rows and return an int
+        sure_bet_count = df[df['attendance_category'] == 'Sure bet'].shape[0]
+        at_risk_count = df[df['attendance_category'] == 'At risk'].shape[0]
+        not_met_count = df[df['attendance_category'] == 'Not met'].shape[0]
+        on_track_count = df[df['attendance_category'] == 'On track'].shape[0]
+        total_count = df['attendance_category'].shape[0]
 
-    # calculate percentage of children in each category
-    sure_bet_pct = sure_bet_count / total_count
-    at_risk_pct = at_risk_count / total_count
-    not_met_pct = not_met_count / total_count
-    on_track_pct = on_track_count / total_count
+        # calculate percentage of children in each category
+        sure_bet_pct = sure_bet_count / total_count
+        at_risk_pct = at_risk_count / total_count
+        not_met_pct = not_met_count / total_count
+        on_track_pct = on_track_count / total_count
 
     # make table
     label_col = ['Sure bet',
@@ -50,13 +55,16 @@ def make_attendance_table(df):
                 'id': 'percentage',
                 'name': 'Percentage',
                 'type': 'numeric',
-                'format': FormatTemplate.percentage(0)
+                'format': {'nully':'-%',
+                        'prefix': None,
+                        'specifier': '.0%'}
             }, {
                 'id': 'count',
                 'name': 'Count',
                 'type': 'numeric',
                 'format': Format(
-                    precision=0
+                    precision=0,
+                    nully='-'
                 )
             }
         ],
