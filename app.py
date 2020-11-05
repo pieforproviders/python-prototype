@@ -32,7 +32,7 @@ summary_table = make_attendance_table(df_dashboard)
 
 # dash app
 app = dash.Dash(__name__,
-                external_stylesheets=[dbc.themes.FLATLY])
+                external_stylesheets=[dbc.themes.BOOTSTRAP])
 auth = dash_auth.BasicAuth(
     app,
     {username: password}
@@ -94,7 +94,7 @@ attendance_copy_card = dbc.Card(
             html.H2(
                 dbc.Button(
                     'More details on attendance risk',
-                    color='info',
+                    color='link',
                     id='toggle-1'
                 )
             )
@@ -146,7 +146,7 @@ revenue_copy_card = dbc.Card(
             html.H2(
                 dbc.Button(
                     'More details on revenue',
-                    color='info',
+                    color='link',
                     id='toggle-2'
                 )
             )
@@ -217,7 +217,7 @@ app.layout = html.Div(
                     dbc.Alert('At-risk case warnings will be available with '
                                 + str(days_req_for_warnings) 
                                 + ' days of attendance data',
-                                color='info',
+                                color='warning',
                                 is_open=is_data_insufficient)
                 ),
 
