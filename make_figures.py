@@ -49,7 +49,7 @@ def make_attendance_table(df):
         id='summary',
         columns=[{
                 'id': 'attendance_category',
-                'name': 'Attendance category',
+                'name': 'Attendance risk',
                 'type': 'text'
             }, {
                 'id': 'percentage',
@@ -156,7 +156,7 @@ def make_table(df):
                         'type': 'text'
                     }, {
                         'id': 'attendance_category',
-                        'name': 'Attendance category',
+                        'name': 'Attendance risk',
                         'type': 'text'
                     }, {
                         'id': 'attendance_rate',
