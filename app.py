@@ -7,11 +7,12 @@ import pandas as pd
 
 import dash
 import dash_auth
-import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
 
 from data_input import get_dashboard_data
-from make_figures import make_table 
+from make_figures import make_table, make_revenue_chart, make_attendance_table 
 
 # load environment variables
 username = os.environ.get('USERNAME')
@@ -25,6 +26,8 @@ max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
 
 # figures
 child_table = make_table(df_dashboard)
+revenue_chart = make_revenue_chart(df_dashboard)
+summary_table = make_attendance_table(df_dashboard)
 
 # dash app
 app = dash.Dash(__name__,
@@ -56,45 +59,32 @@ navbar = dbc.Navbar(
 )
 
 # summary cards
-guaranteed_revenue_card = dbc.Card(
+attendance_summary_card = dbc.Card(
     [
-        dbc.CardHeader("Guaranteed revenue"),
         dbc.CardBody(
-            [
-                html.H4(
-                    '$' + str(round(min_revenue_sum, 2)), className="card-title font-weight-bold"
-                )
+            [   html.H3('Total Attendance',
+                        style={'font-size': '1.5rem'}),
+                summary_table
             ]
         )  
-    ]
+    ],
+    className='h-100',
 )
 
-potential_revenue_card = dbc.Card(
+revenue_summary_card = dbc.Card(
     [
-        dbc.CardHeader("Potential revenue"),
         dbc.CardBody(
             [
-                html.H4(
-                    '$' + str(round(potential_revenue_sum, 2)), className="card-title font-weight-bold"
-                )
+                html.H3('Total Revenue',
+                        style={'font-size': '1.5rem'}),
+                dcc.Graph(
+                    figure=revenue_chart,
+                    config={'displayModeBar':False})
             ]
         )  
-    ]
+    ],
+    className='h-100',
 )
-
-max_approved_revenue_card = dbc.Card(
-    [
-        dbc.CardHeader("Max. approved revenue"),
-        dbc.CardBody(
-            [
-                html.H4(
-                    '$' + str(round(max_approved_revenue_sum, 2)), className="card-title font-weight-bold"
-                )
-            ]
-        )  
-    ]
-)
-
 
 app.layout = html.Div(
     [navbar,
@@ -116,12 +106,19 @@ app.layout = html.Div(
                 # Summary statistics
                 html.Div(
                     [
-                        dbc.CardGroup(
+                        dbc.Row(
                             [
-                                guaranteed_revenue_card,
-                                potential_revenue_card,
-                                max_approved_revenue_card
+                                dbc.Col(
+                                    attendance_summary_card,
+                                    width=4
+                                ),
+                                dbc.Col(
+                                    revenue_summary_card,
+                                    width=8
+                                )
                             ],
+                            no_gutters=True,
+                            align='stretch'
                         ),
                     ]
                 ),
