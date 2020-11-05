@@ -24,9 +24,9 @@ def make_attendance_table(df):
 
     # make table
     label_col = ['Sure bet',
-                 'On Track',
-                 'At Risk',
-                 'Not Met']
+                 'On track',
+                 'At risk',
+                 'Not met']
     pct_col = [sure_bet_pct,
                on_track_pct,
                at_risk_pct,
@@ -44,7 +44,7 @@ def make_attendance_table(df):
         id='summary',
         columns=[{
                 'id': 'attendance_category',
-                'name': 'Attendance Category',
+                'name': 'Attendance category',
                 'type': 'text'
             }, {
                 'id': 'percentage',
