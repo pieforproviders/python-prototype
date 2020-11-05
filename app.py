@@ -67,7 +67,8 @@ attendance_summary_card = dbc.Card(
                 summary_table
             ]
         )  
-    ]
+    ],
+    className='h-100',
 )
 
 revenue_summary_card = dbc.Card(
@@ -81,7 +82,8 @@ revenue_summary_card = dbc.Card(
                     config={'displayModeBar':False})
             ]
         )  
-    ]
+    ],
+    className='h-100',
 )
 
 app.layout = html.Div(
@@ -115,7 +117,8 @@ app.layout = html.Div(
                                     width=8
                                 )
                             ],
-                            no_gutters=True
+                            no_gutters=True,
+                            align='stretch'
                         ),
                     ]
                 ),
