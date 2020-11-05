@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 # attendance summary
 def make_attendance_table(df):
     # check if not enough info
-    if df.loc[0, 'attendance_category'] == 'Not enough information':
+    if df.loc[0, 'attendance_category'] == 'Not enough info':
         sure_bet_count, at_risk_count, not_met_count, on_track_count = [None] * 4
         sure_bet_pct, at_risk_pct, not_met_pct, on_track_pct = [None] * 4
     else:
@@ -182,7 +182,7 @@ def make_table(df):
                     style_data_conditional=[
                         {
                             'if': {
-                                'filter_query': '{attendance_category} = "Not enough information"',
+                                'filter_query': '{attendance_category} = "Not enough info"',
                                 'column_id': 'attendance_category'
                             },
                             'backgroundColor': 'rgb(248, 248, 248)',
