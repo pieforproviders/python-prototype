@@ -233,7 +233,7 @@ app.index_string=f"""<!DOCTYPE html>
             function gtag(){{dataLayer.push(arguments);}}
             gtag('js', new Date());
 
-            gtag('config', 'G-04E4MPCQYQ');
+            gtag('config', '{ga_tracking_id}');
         </script>
         {{%metas%}}
         <title>{{%title%}}</title>
