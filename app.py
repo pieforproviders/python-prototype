@@ -10,6 +10,7 @@ import dash_auth
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State
 
 from data_input import get_dashboard_data
 from make_figures import make_table, make_revenue_chart, make_attendance_table 
@@ -86,8 +87,55 @@ revenue_summary_card = dbc.Card(
     className='h-100',
 )
 
+# detail cards
+attendance_copy_card = dbc.Card(
+    [
+        dbc.CardHeader(
+            html.H2(
+                dbc.Button(
+                    'More details on attendance risk',
+                    color='info',
+                    id='toggle-1'
+                )
+            )
+        ),
+        dbc.Collapse(
+            dbc.CardBody(
+                'Attendance copy'
+            ),
+            id='collapse-1'
+        )
+    ]
+)
+
+revenue_copy_card = dbc.Card(
+    [
+        dbc.CardHeader(
+            html.H2(
+                dbc.Button(
+                    'More details on revenue',
+                    color='info',
+                    id='toggle-2'
+                )
+            )
+        ),
+        dbc.Collapse(
+            dbc.CardBody(
+                'Revenue copy'
+            ),
+            id='collapse-2'
+        )
+    ]
+)
+
+accordion = html.Div(
+    [attendance_copy_card, revenue_copy_card], className='accordion'
+)
+
+
 app.layout = html.Div(
-    [navbar,
+    [
+        navbar,
         dbc.Container(
             [   
                 html.H1(children='Your dashboard'),
@@ -123,6 +171,8 @@ app.layout = html.Div(
                     ]
                 ),
 
+                accordion,
+
                 html.Br(),
 
                 # Child level table
@@ -133,6 +183,27 @@ app.layout = html.Div(
         )   
     ]
 )
+
+# callbacks
+@app.callback(
+    [Output(f"collapse-{i}", "is_open") for i in range(1, 3)],
+    [Input(f"toggle-{i}", "n_clicks") for i in range(1, 3)],
+    [State(f"collapse-{i}", "is_open") for i in range(1, 3)],
+)
+
+def toggle_accordion(n1, n2, is_open1, is_open2):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        return False, False
+    else:
+        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if button_id == "toggle-1" and n1:
+        return not is_open1, False
+    elif button_id == "toggle-2" and n2:
+        return False, not is_open2
+    return False, False
 
 if __name__ == '__main__':
     app.run_server(debug=True)
