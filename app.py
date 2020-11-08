@@ -18,6 +18,7 @@ from make_figures import make_table, make_revenue_chart, make_attendance_table
 # load environment variables
 username = os.environ.get('USERNAME')
 password = os.environ.get('PASSWORD')
+ga_tracking_id = os.environ.get('GA_TRACKING_ID')
 
 # load data
 df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
@@ -251,7 +252,7 @@ app.layout = html.Div(
                 ),
                 email_copy
             ]
-        )   
+        )
     ]
 )
 
@@ -275,6 +276,33 @@ def toggle_accordion(n1, n2, is_open1, is_open2):
     elif button_id == "toggle-2" and n2:
         return False, not is_open2
     return False, False
+
+app.index_string=f"""<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={ga_tracking_id}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){{dataLayer.push(arguments);}}
+            gtag('js', new Date());
+
+            gtag('config', '{ga_tracking_id}');
+        </script>
+        {{%metas%}}
+        <title>{{%title%}}</title>
+        {{%favicon%}}
+        {{%css%}}
+    </head>
+    <body>
+        {{%app_entry%}}
+        <footer>
+            {{%config%}}
+            {{%scripts%}}
+            {{%renderer%}}
+        </footer>
+    </body>
+</html>"""
 
 if __name__ == '__main__':
     app.run_server(debug=True)
