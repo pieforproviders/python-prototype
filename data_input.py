@@ -6,17 +6,20 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# load environment variables
-load_dotenv()
-attendance_file = os.environ.get('ATTENDANCE_FILE')
-payment_file = os.environ.get('PAYMENT_FILE')
-
 # constants
+BASE_PATH = Path(__file__).parent.resolve()
 DATA_PATH = Path(__file__).parent.joinpath('data').resolve()
 ATTENDANCE_THRESHOLD = 0.495
 
+# load env var from .env file if in local environment
+if BASE_PATH.joinpath('.env').exists():
+    load_dotenv()
+user_dir = os.environ.get('USER_DIR')
+attendance_file = os.environ.get('ATTENDANCE_FILE')
+payment_file = os.environ.get('PAYMENT_FILE')
+
 def get_attendance_data():
-    attendance = pd.read_csv(DATA_PATH.joinpath(attendance_file),
+    attendance = pd.read_csv(DATA_PATH.joinpath(user_dir, attendance_file),
                             usecols=['Child ID',
                                     'Date',
                                     'School account',
@@ -33,7 +36,7 @@ def get_attendance_data():
     return attendance
 
 def get_payment_data():
-    payment = pd.read_csv(DATA_PATH.joinpath(payment_file),
+    payment = pd.read_csv(DATA_PATH.joinpath(user_dir, payment_file),
                             skiprows=1,
                             usecols=['Business Name',
                                     'First name**',
