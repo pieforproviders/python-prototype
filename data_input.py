@@ -1,16 +1,22 @@
-from pathlib import Path
-
+from dotenv import load_dotenv
 import math
+import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+# load environment variables
+load_dotenv()
+attendance_file = os.environ.get('ATTENDANCE_FILE')
+payment_file = os.environ.get('PAYMENT_FILE')
 
 # constants
 DATA_PATH = Path(__file__).parent.joinpath('data').resolve()
 ATTENDANCE_THRESHOLD = 0.495
 
 def get_attendance_data():
-    attendance = pd.read_csv(DATA_PATH.joinpath('Attendance-Calculation-Sep-2020.csv'),
+    attendance = pd.read_csv(DATA_PATH.joinpath(attendance_file),
                             usecols=['Child ID',
                                     'Date',
                                     'School account',
@@ -27,7 +33,7 @@ def get_attendance_data():
     return attendance
 
 def get_payment_data():
-    payment = pd.read_csv(DATA_PATH.joinpath('Sample-Billing-Reconciliation-Sep-2020.csv'),
+    payment = pd.read_csv(DATA_PATH.joinpath(payment_file),
                             skiprows=1,
                             usecols=['Business Name',
                                     'First name**',
@@ -243,6 +249,7 @@ def get_dashboard_data():
 if __name__ == '__main__':
     attendance = get_attendance_data()
     payment = get_payment_data()
+
     # subset attendance to half month to simulate having onlf half month data
     attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
 
