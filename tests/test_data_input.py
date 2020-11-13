@@ -88,12 +88,12 @@ def test_calculate_family_days():
             'full_days_attended': [3, 2, 5],
             'adj_part_days_approved': [3, 4, 5],
             'part_days_attended': [2, 4, 4],
-            'family_full_days_approved': [11, 11, 6],
+            'family_full_days_approved': [11, 11, 7],
             'family_full_days_attended': [5, 5, 5],
             'family_part_days_approved': [7, 7, 5],
             'family_part_days_attended': [6, 6, 4],
-            'family_total_days_approved': [18, 18, 11],
-            'family_total_days_attended': [11, 11, 10],
+            'family_total_days_approved': [18, 18, 12],
+            'family_total_days_attended': [11, 11, 9],
         }
     )
     assert_frame_equal(calculate_family_days(example_df), expected_df)
