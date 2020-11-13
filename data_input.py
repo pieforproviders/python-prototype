@@ -137,14 +137,14 @@ def adjust_school_age_days(merged_df):
     df['extra_full_days'] = df.apply(calculate_extra_full_days, axis = 1)
 
     # add extra full days to full days approved
-    df['full_days_approved'] = df.apply(
+    df['adj_full_days_approved'] = df.apply(
         lambda row: row['full_days_approved'] + row['extra_full_days']
         if row['extra_full_days'] > 0 else row['full_days_approved'],
         axis=1
     )
 
     # subtract extra full days from part days approved
-    df['part_days_approved'] = df.apply(
+    df['adj_part_days_approved'] = df.apply(
         lambda row: row['part_days_approved'] - row['extra_full_days']
         if row['extra_full_days'] > 0 else row['part_days_approved'],
         axis=1
@@ -315,6 +315,7 @@ if __name__ == '__main__':
     # process data for dashboard
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
+    payment_attendance_adj = adjust_school_age_days(payment_attendance)
     payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
     revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
                                                         days_left)

@@ -55,10 +55,12 @@ def test_adjust_school_age_days():
         {
             'child_id': ['a', 'b', 'c', 'd', 'e', 'f'],
             'school_age': ['Yes', 'Yes', 'Yes', 'No', 'No', 'No'],
-            'full_days_approved': [5, 6, 5, 5, 5, 5],
+            'full_days_approved': [5, 5, 5, 5, 5, 5],
             'full_days_attended': [3, 6, 5, 3, 6, 5],
-            'part_days_approved': [3, 2, 3, 3, 3, 3],
+            'part_days_approved': [3, 3, 3, 3, 3, 3],
             'part_days_attended': [5, 2, 3, 5, 2, 3],
+            'adj_full_days_approved': [5, 6, 5, 5, 5, 5],
+            'adj_part_days_approved': [3, 2, 3, 3, 3, 3],
         }
     )
     assert_frame_equal(
