@@ -7,7 +7,8 @@ from io import StringIO
 from data_input import(
     calculate_month_days,
     process_attendance_data,
-    adjust_school_age_days
+    adjust_school_age_days,
+    calculate_family_days
     )
 
 @pytest.fixture
@@ -65,4 +66,34 @@ def test_adjust_school_age_days():
     )
     assert_frame_equal(
         adjust_school_age_days(example_df), expected_df
-     )
+    )
+
+def test_calculate_family_days():
+    example_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c'],
+            'case_number': ['01', '01', '02'],
+            'adj_full_days_approved': [5, 6, 7],
+            'full_days_attended': [3, 2, 5],
+            'adj_part_days_approved': [3, 4, 5],
+            'part_days_attended': [2, 4, 4],
+        }
+    )
+
+    expected_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c'],
+            'case_number': ['01', '01', '02'],
+            'adj_full_days_approved': [5, 6, 7],
+            'full_days_attended': [3, 2, 5],
+            'adj_part_days_approved': [3, 4, 5],
+            'part_days_attended': [2, 4, 4],
+            'family_full_days_approved': [11, 11, 6],
+            'family_full_days_attended': [5, 5, 5],
+            'family_part_days_approved': [7, 7, 5],
+            'family_part_days_attended': [6, 6, 4],
+            'family_total_days_approved': [18, 18, 11],
+            'family_total_days_attended': [11, 11, 10],
+        }
+    )
+    assert_frame_equal(calculate_family_days(example_df), expected_df)
