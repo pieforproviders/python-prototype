@@ -109,6 +109,50 @@ def process_attendance_data(attendance_df):
 
     return attendance_per_child
 
+def adjust_school_age_days(merged_df):
+    '''
+    Adjust approved days for school-aged children based on attendance.
+
+    Returns a dataframe with adjusted full and part day approved
+    '''
+    # helper function for new extra_full_days field
+    def calculate_extra_full_days(row):
+        # If school age and attended_full > approved_full,
+        # count extra_full_days.
+        # Then add to approved_full and subtract approved_part accordingly
+        if (
+            row['school_age'] == 'Yes' 
+            and row['full_days_attended'] > row['full_days_approved']
+        ):
+            extra_full_days = (
+                row['full_days_attended'] - row['full_days_approved']
+            )
+        else:
+            extra_full_days = 0
+        return extra_full_days
+
+    df = merged_df.copy()
+
+    # calculate "extra" full days used
+    df['extra_full_days'] = df.apply(calculate_extra_full_days, axis = 1)
+
+    # add extra full days to full days approved
+    df['full_days_approved'] = df.apply(
+        lambda row: row['full_days_approved'] + row['extra_full_days']
+        if row['extra_full_days'] > 0 else row['full_days_approved'],
+        axis=1
+    )
+
+    # subtract extra full days from part days approved
+    df['part_days_approved'] = df.apply(
+        lambda row: row['part_days_approved'] - row['extra_full_days']
+        if row['extra_full_days'] > 0 else row['part_days_approved'],
+        axis=1
+    )
+
+    df = df.drop('extra_full_days', axis=1)
+    return df
+
 def process_merged_data(merged_df, month_days, days_left):
     days_elapsed = month_days - days_left
     # helper function to categorize 
