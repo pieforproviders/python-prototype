@@ -305,11 +305,14 @@ def get_dashboard_data():
     # process data for dashboard
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
-    payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
-    revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
-                                                        days_left)
-    all_vars_per_child = calculate_attendance_rate(revenues_per_child_df)
-    df_dashboard = produce_dashboard_df(all_vars_per_child)
+    df_dashboard = (
+        payment_attendance.pipe(adjust_school_age_days)
+                          .pipe(calculate_family_days)
+                          .pipe(process_merged_data, month_days, days_left)
+                          .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_attendance_rate)
+                          .pipe(produce_dashboard_df)
+    )
     return df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings
 
 if __name__ == '__main__':
@@ -334,8 +337,12 @@ if __name__ == '__main__':
     # process data for dashboard
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
-    payment_attendance_adj = adjust_school_age_days(payment_attendance)
-    payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
-    revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
-                                                        days_left)
+    df_dashboard = (
+        payment_attendance.pipe(adjust_school_age_days)
+                          .pipe(calculate_family_days)
+                          .pipe(process_merged_data, month_days, days_left)
+                          .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_attendance_rate)
+                          .pipe(produce_dashboard_df)
+    )
 
