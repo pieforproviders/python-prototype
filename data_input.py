@@ -131,27 +131,27 @@ def adjust_school_age_days(merged_df):
             extra_full_days = 0
         return extra_full_days
 
-    df = merged_df.copy()
-
     # calculate "extra" full days used
-    df['extra_full_days'] = df.apply(calculate_extra_full_days, axis = 1)
+    merged_df['extra_full_days'] = merged_df.apply(
+        calculate_extra_full_days, axis = 1
+    )
 
     # add extra full days to full days approved
-    df['adj_full_days_approved'] = df.apply(
+    merged_df['adj_full_days_approved'] = merged_df.apply(
         lambda row: row['full_days_approved'] + row['extra_full_days']
         if row['extra_full_days'] > 0 else row['full_days_approved'],
         axis=1
     )
 
     # subtract extra full days from part days approved
-    df['adj_part_days_approved'] = df.apply(
+    merged_df['adj_part_days_approved'] = merged_df.apply(
         lambda row: row['part_days_approved'] - row['extra_full_days']
         if row['extra_full_days'] > 0 else row['part_days_approved'],
         axis=1
     )
 
-    df = df.drop('extra_full_days', axis=1)
-    return df
+    merged_df = merged_df.drop('extra_full_days', axis=1)
+    return merged_df
 
 def calculate_family_days(merged_df):
     '''
@@ -159,35 +159,36 @@ def calculate_family_days(merged_df):
 
     Returns a dataframe with part and full family days attended and approved.  
     '''
-    df = merged_df.copy()
 
     # calculate family level days approved and attended
-    df['family_full_days_approved'] = (
-        df.groupby('case_number')['adj_full_days_approved']
+    merged_df['family_full_days_approved'] = (
+        merged_df.groupby('case_number')['adj_full_days_approved']
           .transform(lambda x: np.sum(x))
     )
-    df['family_full_days_attended'] = (
-        df.groupby('case_number')['full_days_attended']
+    merged_df['family_full_days_attended'] = (
+        merged_df.groupby('case_number')['full_days_attended']
           .transform(lambda x: np.sum(x))
     )               
-    df['family_part_days_approved'] = (
-        df.groupby('case_number')['adj_part_days_approved']
+    merged_df['family_part_days_approved'] = (
+        merged_df.groupby('case_number')['adj_part_days_approved']
           .transform(lambda x: np.sum(x))
     )
-    df['family_part_days_attended'] = (
-        df.groupby('case_number')['part_days_attended']
+    merged_df['family_part_days_attended'] = (
+        merged_df.groupby('case_number')['part_days_attended']
           .transform(lambda x: np.sum(x))
     )  
 
     # calculate total family days
-    df['family_total_days_approved'] = (
-        df['family_full_days_approved'] + df['family_part_days_approved']
+    merged_df['family_total_days_approved'] = (
+        merged_df['family_full_days_approved'] 
+        + merged_df['family_part_days_approved']
     )
-    df['family_total_days_attended'] = (
-        df['family_full_days_attended'] + df['family_part_days_attended']
+    merged_df['family_total_days_attended'] = (
+        merged_df['family_full_days_attended'] 
+        + merged_df['family_part_days_attended']
     )
 
-    return df
+    return merged_df
 
 def process_merged_data(merged_df, month_days, days_left):
     days_elapsed = month_days - days_left
