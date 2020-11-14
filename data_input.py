@@ -296,14 +296,17 @@ def calculate_attendance_rate(df):
 
 def produce_dashboard_df(df):
     # filter to required columns
-    cols_to_keep = ['name',
-                    'case_number',
-                    'biz_name',
-                    'attendance_category',
-                    'attendance_rate',
-                    'min_revenue',
-                    'potential_revenue',
-                    'max_monthly_payment']
+    cols_to_keep = [
+        'name',
+        'case_number',
+        'biz_name',
+        'attendance_category',
+        'attendance_rate',
+        'min_revenue',
+        'potential_revenue',
+        'max_monthly_payment',
+        'e_learning_revenue_potential'
+    ]
     df_sub = df.loc[:, cols_to_keep].copy()
     return df_sub
 
@@ -334,6 +337,7 @@ def get_dashboard_data():
                           .pipe(calculate_family_days)
                           .pipe(process_merged_data, month_days, days_left)
                           .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
                           .pipe(produce_dashboard_df)
     )
@@ -366,6 +370,7 @@ if __name__ == '__main__':
                           .pipe(calculate_family_days)
                           .pipe(process_merged_data, month_days, days_left)
                           .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
                           .pipe(produce_dashboard_df)
     )
