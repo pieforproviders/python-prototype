@@ -79,6 +79,7 @@ def make_revenue_chart(df):
     min_revenue_sum = df['min_revenue'].sum()
     potential_revenue_sum = df['potential_revenue'].sum()
     max_approved_revenue_sum = df['max_monthly_payment'].sum()
+    potential_e_learning_revenue_sum = df['e_learning_revenue_potential'].sum()
 
     min_potential_delta = potential_revenue_sum - min_revenue_sum
     potential_max_delta = max_approved_revenue_sum - potential_revenue_sum
@@ -110,8 +111,18 @@ def make_revenue_chart(df):
                     width=[0.3],
                     orientation='h',
                     marker_color='rgb(204,239,255)')
+    trace_elearning = go.Bar(
+        name=('Potential e-learning revenue <br>'
+            + '$' + str(round(potential_e_learning_revenue_sum))
+        ),
+        y=['revenue'],
+        x=[potential_e_learning_revenue_sum],
+        width=[0.3],
+        orientation='h',
+        marker_color='rgb(230,230,230)',
+    )
 
-    data = [trace_min, trace_potential, trace_max]
+    data = [trace_min, trace_potential, trace_max, trace_elearning]
     layout = go.Layout(
                 barmode='stack',
                 yaxis={'visible':False,
@@ -130,9 +141,9 @@ def make_revenue_chart(df):
                 legend={'orientation':'h',
                         'traceorder':'normal'},
                 hovermode=False,
-                font={'size':17},
+                font={'size':16},
                 autosize=False,
-                height=150
+                height=200
                 )
     fig = go.Figure(data=data, layout=layout)
     return fig
