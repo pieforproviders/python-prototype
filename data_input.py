@@ -265,6 +265,30 @@ def calculate_revenues_per_child(merged_df, days_left):
 
     return merged_df
 
+def calculate_e_learning_revenue(merged_df):
+    '''
+    Calculate the additional rev potential if all part days become full
+
+    Returns a dataframe with an additional e learning potential revenue column
+    '''
+    # Helper function
+    def e_learning_helper(row):
+        if (row['school_age'] == 'Yes' 
+            and row['adj_part_days_approved'] > row['part_days_attended']):
+            e_learning_revenue = (
+                (row['adj_part_days_approved'] - row['part_days_attended']) 
+                * (row['full_day_rate'] - row['part_day_rate'])
+            )
+        else:
+            e_learning_revenue = 0
+        return e_learning_revenue
+
+    merged_df['e_learning_revenue_potential'] = (
+        merged_df.apply(e_learning_helper, axis=1)
+    )
+
+    return merged_df
+
 def calculate_attendance_rate(df):
     # part day
     df['attendance_rate'] = df['family_total_days_attended'] / df['family_total_days_approved']

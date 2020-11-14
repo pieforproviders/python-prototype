@@ -8,7 +8,8 @@ from data_input import(
     calculate_month_days,
     process_attendance_data,
     adjust_school_age_days,
-    calculate_family_days
+    calculate_family_days,
+    calculate_e_learning_revenue
     )
 
 @pytest.fixture
@@ -95,5 +96,30 @@ def test_calculate_family_days():
             'family_total_days_approved': [18, 18, 12],
             'family_total_days_attended': [11, 11, 9],
         }
-    )
+    )   
     assert_frame_equal(calculate_family_days(example_df), expected_df)
+
+def test_calculate_e_learning_revenue():
+    example_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c', 'd'],
+            'school_age': ['Yes', 'Yes', 'No', 'No'],
+            'part_days_attended': [3, 5, 3, 5],
+            'adj_part_days_approved': [5, 5, 5, 5],
+            'full_day_rate': [20, 20, 20, 20],
+            'part_day_rate': [10, 10, 10, 10],
+        }
+    )
+
+    expected_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c', 'd'],
+            'school_age': ['Yes', 'Yes', 'No', 'No'],
+            'part_days_attended': [3, 5, 3, 5],
+            'adj_part_days_approved': [5, 5, 5, 5],
+            'full_day_rate': [20, 20, 20, 20],
+            'part_day_rate': [10, 10, 10, 10],
+            'e_learning_revenue_potential': [20, 0, 0, 0],
+        }
+    )
+    assert_frame_equal(calculate_e_learning_revenue(example_df), expected_df)
