@@ -81,7 +81,8 @@ revenue_summary_card = dbc.Card(
                         style={'font-size': '1.5rem'}),
                 dcc.Graph(
                     figure=revenue_chart,
-                    config={'displayModeBar':False})
+                    config={'displayModeBar':False},
+                    style={'overflowX': 'auto'})
             ]
         )  
     ],
