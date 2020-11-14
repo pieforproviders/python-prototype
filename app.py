@@ -172,7 +172,13 @@ revenue_copy_card = dbc.Card(
                             html.Strong('Max. approved revenue: '),
                             html.Span('if all children meet 80% attendance rate')
                         ]
-                    )
+                    ),
+                    html.P(
+                        [
+                            html.Strong('Potential e-learning revenue: '),
+                            html.Span('if approved part days become full days for e-learning')
+                        ]
+                    ),
                 ]
             ),
             id='collapse-2'
