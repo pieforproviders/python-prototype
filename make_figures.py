@@ -178,6 +178,11 @@ def make_table(df):
                         'name': 'Max. revenue approved',
                         'type': 'numeric',
                         'format': FormatTemplate.money(2)
+                    }, {
+                        'id': 'e_learning_revenue_potential',
+                        'name': 'Potential e-learning revenue',
+                        'type': 'numeric',
+                        'format': FormatTemplate.money(2)
                     }],
                     style_data_conditional=[
                         {
@@ -217,9 +222,15 @@ def make_table(df):
                             'color': '#2ECC40'
                         }
                     ],
+                    style_header={
+                        'whiteSpace': 'normal',
+                        'height': 'auto',
+                        'maxWidth': '100px',
+                    },
                     style_table=
                         {
-                            'padding': '20px'
+                            'padding': '20px',
+                            'overflowX': 'auto',
                         },
                     sort_action='native',
                     sort_mode='single',
