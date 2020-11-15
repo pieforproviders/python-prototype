@@ -79,10 +79,7 @@ revenue_summary_card = dbc.Card(
             [
                 html.H3('Total Revenue',
                         style={'font-size': '1.5rem'}),
-                dcc.Graph(
-                    figure=revenue_chart,
-                    config={'displayModeBar':False},
-                    style={'overflowX': 'auto'})
+                revenue_chart
             ]
         )  
     ],

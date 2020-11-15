@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+import dash_core_components as dcc
 import dash_table
 from dash_table.Format import Format
 import dash_table.FormatTemplate as FormatTemplate
@@ -137,16 +138,20 @@ def make_revenue_chart(df):
                     'l':0,
                     'r':0,
                     't':0,
-                    'b':0},
+                    'b':0,
+                },
                 legend={'orientation':'h',
                         'traceorder':'normal'},
                 hovermode=False,
                 font={'size':16},
-                autosize=False,
-                height=200
+                height=200,
                 )
     fig = go.Figure(data=data, layout=layout)
-    return fig
+    return dcc.Graph(
+        figure=fig,
+        config={'displayModeBar':False},
+    )
+    
 
 # child level table
 def make_table(df):
