@@ -6,7 +6,10 @@ from io import StringIO
 
 from data_input import(
     calculate_month_days,
-    process_attendance_data
+    process_attendance_data,
+    adjust_school_age_days,
+    calculate_family_days,
+    calculate_e_learning_revenue
     )
 
 @pytest.fixture
@@ -22,7 +25,6 @@ def example_attendance_data():
     attendance = pd.read_csv(attendance_data)
     attendance['date'] = pd.to_datetime(attendance['date'])
     return attendance
-
 
 def test_calculate_month_days(example_attendance_data):
     expected = (30, 28) # function returns month days, days left
@@ -40,5 +42,84 @@ def test_process_attendance_data(example_attendance_data):
     assert_frame_equal(process_attendance_data(example_attendance_data), expected,
                        check_like=True)
 
+def test_adjust_school_age_days():
+    example_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c', 'd', 'e', 'f'],
+            'school_age': ['Yes', 'Yes', 'Yes', 'No', 'No', 'No'],
+            'full_days_approved': [5, 5, 5, 5, 5, 5],
+            'full_days_attended': [3, 6, 5, 3, 6, 5],
+            'part_days_approved': [3, 3, 3, 3, 3, 3],
+            'part_days_attended': [5, 2, 3, 5, 2, 3],
+        }
+    )
+    expected_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c', 'd', 'e', 'f'],
+            'school_age': ['Yes', 'Yes', 'Yes', 'No', 'No', 'No'],
+            'full_days_approved': [5, 5, 5, 5, 5, 5],
+            'full_days_attended': [3, 6, 5, 3, 6, 5],
+            'part_days_approved': [3, 3, 3, 3, 3, 3],
+            'part_days_attended': [5, 2, 3, 5, 2, 3],
+            'adj_full_days_approved': [5, 6, 5, 5, 5, 5],
+            'adj_part_days_approved': [3, 2, 3, 3, 3, 3],
+        }
+    )
+    assert_frame_equal(
+        adjust_school_age_days(example_df), expected_df
+    )
 
+def test_calculate_family_days():
+    example_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c'],
+            'case_number': ['01', '01', '02'],
+            'adj_full_days_approved': [5, 6, 7],
+            'full_days_attended': [3, 2, 5],
+            'adj_part_days_approved': [3, 4, 5],
+            'part_days_attended': [2, 4, 4],
+        }
+    )
 
+    expected_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c'],
+            'case_number': ['01', '01', '02'],
+            'adj_full_days_approved': [5, 6, 7],
+            'full_days_attended': [3, 2, 5],
+            'adj_part_days_approved': [3, 4, 5],
+            'part_days_attended': [2, 4, 4],
+            'family_full_days_approved': [11, 11, 7],
+            'family_full_days_attended': [5, 5, 5],
+            'family_part_days_approved': [7, 7, 5],
+            'family_part_days_attended': [6, 6, 4],
+            'family_total_days_approved': [18, 18, 12],
+            'family_total_days_attended': [11, 11, 9],
+        }
+    )   
+    assert_frame_equal(calculate_family_days(example_df), expected_df)
+
+def test_calculate_e_learning_revenue():
+    example_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c', 'd'],
+            'school_age': ['Yes', 'Yes', 'No', 'No'],
+            'part_days_attended': [3, 5, 3, 5],
+            'adj_part_days_approved': [5, 5, 5, 5],
+            'full_day_rate': [20, 20, 20, 20],
+            'part_day_rate': [10, 10, 10, 10],
+        }
+    )
+
+    expected_df = pd.DataFrame(
+        {
+            'child_id': ['a', 'b', 'c', 'd'],
+            'school_age': ['Yes', 'Yes', 'No', 'No'],
+            'part_days_attended': [3, 5, 3, 5],
+            'adj_part_days_approved': [5, 5, 5, 5],
+            'full_day_rate': [20, 20, 20, 20],
+            'part_day_rate': [10, 10, 10, 10],
+            'e_learning_revenue_potential': [20, 0, 0, 0],
+        }
+    )
+    assert_frame_equal(calculate_e_learning_revenue(example_df), expected_df)

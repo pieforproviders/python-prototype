@@ -109,6 +109,87 @@ def process_attendance_data(attendance_df):
 
     return attendance_per_child
 
+def adjust_school_age_days(merged_df):
+    '''
+    Adjust approved days for school-aged children based on attendance.
+
+    Returns a dataframe with adjusted full and part day approved
+    '''
+    # helper function for new extra_full_days field
+    def calculate_extra_full_days(row):
+        # If school age and attended_full > approved_full,
+        # count extra_full_days.
+        # Then add to approved_full and subtract approved_part accordingly
+        if (
+            row['school_age'] == 'Yes' 
+            and row['full_days_attended'] > row['full_days_approved']
+        ):
+            extra_full_days = (
+                row['full_days_attended'] - row['full_days_approved']
+            )
+        else:
+            extra_full_days = 0
+        return extra_full_days
+
+    # calculate "extra" full days used
+    merged_df['extra_full_days'] = merged_df.apply(
+        calculate_extra_full_days, axis = 1
+    )
+
+    # add extra full days to full days approved
+    merged_df['adj_full_days_approved'] = merged_df.apply(
+        lambda row: row['full_days_approved'] + row['extra_full_days']
+        if row['extra_full_days'] > 0 else row['full_days_approved'],
+        axis=1
+    )
+
+    # subtract extra full days from part days approved
+    merged_df['adj_part_days_approved'] = merged_df.apply(
+        lambda row: row['part_days_approved'] - row['extra_full_days']
+        if row['extra_full_days'] > 0 else row['part_days_approved'],
+        axis=1
+    )
+
+    merged_df = merged_df.drop('extra_full_days', axis=1)
+    return merged_df
+
+def calculate_family_days(merged_df):
+    '''
+    Aggregates child level days on a family level.
+
+    Returns a dataframe with part and full family days attended and approved.  
+    '''
+
+    # calculate family level days approved and attended
+    merged_df['family_full_days_approved'] = (
+        merged_df.groupby('case_number')['adj_full_days_approved']
+          .transform(lambda x: np.sum(x))
+    )
+    merged_df['family_full_days_attended'] = (
+        merged_df.groupby('case_number')['full_days_attended']
+          .transform(lambda x: np.sum(x))
+    )               
+    merged_df['family_part_days_approved'] = (
+        merged_df.groupby('case_number')['adj_part_days_approved']
+          .transform(lambda x: np.sum(x))
+    )
+    merged_df['family_part_days_attended'] = (
+        merged_df.groupby('case_number')['part_days_attended']
+          .transform(lambda x: np.sum(x))
+    )  
+
+    # calculate total family days
+    merged_df['family_total_days_approved'] = (
+        merged_df['family_full_days_approved'] 
+        + merged_df['family_part_days_approved']
+    )
+    merged_df['family_total_days_attended'] = (
+        merged_df['family_full_days_attended'] 
+        + merged_df['family_part_days_attended']
+    )
+
+    return merged_df
+
 def process_merged_data(merged_df, month_days, days_left):
     days_elapsed = month_days - days_left
     # helper function to categorize 
@@ -138,23 +219,6 @@ def process_merged_data(merged_df, month_days, days_left):
     # calculate number of children in the family
     merged_df['family_children'] = (merged_df.groupby('case_number')['child_id']
                                              .transform('count'))
-
-    # calculate family level days approved and attended
-    merged_df['family_full_days_approved'] = (merged_df.groupby('case_number')['full_days_approved']
-                                                        .transform(lambda x: np.sum(x)))
-    merged_df['family_full_days_attended'] = (merged_df.groupby('case_number')['full_days_attended']
-                                                        .transform(lambda x: np.sum(x)))               
-    merged_df['family_part_days_approved'] = (merged_df.groupby('case_number')['part_days_approved']
-                                                        .transform(lambda x: np.sum(x)))
-    merged_df['family_part_days_attended'] = (merged_df.groupby('case_number')['part_days_attended']
-                                                        .transform(lambda x: np.sum(x)))  
-
-    # calculate total family days
-    merged_df['family_total_days_approved'] = (merged_df['family_full_days_approved']
-                                                + merged_df['family_part_days_approved'])
-    merged_df['family_total_days_attended'] = (merged_df['family_full_days_attended']
-                                                + merged_df['family_part_days_attended'])
-    
     # categorize families
     merged_df['attendance_category'] = merged_df.apply(categorize_families,
                                                     axis=1)
@@ -202,6 +266,30 @@ def calculate_revenues_per_child(merged_df, days_left):
 
     return merged_df
 
+def calculate_e_learning_revenue(merged_df):
+    '''
+    Calculate the additional rev potential if all part days become full
+
+    Returns a dataframe with an additional e learning potential revenue column
+    '''
+    # Helper function
+    def e_learning_helper(row):
+        if (row['school_age'] == 'Yes' 
+            and row['adj_part_days_approved'] > row['part_days_attended']):
+            e_learning_revenue = (
+                (row['adj_part_days_approved'] - row['part_days_attended']) 
+                * (row['full_day_rate'] - row['part_day_rate'])
+            )
+        else:
+            e_learning_revenue = 0
+        return e_learning_revenue
+
+    merged_df['e_learning_revenue_potential'] = (
+        merged_df.apply(e_learning_helper, axis=1)
+    )
+
+    return merged_df
+
 def calculate_attendance_rate(df):
     # part day
     df['attendance_rate'] = df['family_total_days_attended'] / df['family_total_days_approved']
@@ -209,14 +297,17 @@ def calculate_attendance_rate(df):
 
 def produce_dashboard_df(df):
     # filter to required columns
-    cols_to_keep = ['name',
-                    'case_number',
-                    'biz_name',
-                    'attendance_category',
-                    'attendance_rate',
-                    'min_revenue',
-                    'potential_revenue',
-                    'max_monthly_payment']
+    cols_to_keep = [
+        'name',
+        'case_number',
+        'biz_name',
+        'attendance_category',
+        'attendance_rate',
+        'min_revenue',
+        'potential_revenue',
+        'max_monthly_payment',
+        'e_learning_revenue_potential'
+    ]
     df_sub = df.loc[:, cols_to_keep].copy()
     return df_sub
 
@@ -242,11 +333,15 @@ def get_dashboard_data():
     # process data for dashboard
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
-    payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
-    revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
-                                                        days_left)
-    all_vars_per_child = calculate_attendance_rate(revenues_per_child_df)
-    df_dashboard = produce_dashboard_df(all_vars_per_child)
+    df_dashboard = (
+        payment_attendance.pipe(adjust_school_age_days)
+                          .pipe(calculate_family_days)
+                          .pipe(process_merged_data, month_days, days_left)
+                          .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_e_learning_revenue)
+                          .pipe(calculate_attendance_rate)
+                          .pipe(produce_dashboard_df)
+    )
     return df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings
 
 if __name__ == '__main__':
@@ -271,7 +366,13 @@ if __name__ == '__main__':
     # process data for dashboard
     attendance_processed = process_attendance_data(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
-    payment_attendance_processed = process_merged_data(payment_attendance, month_days, days_left)
-    revenues_per_child_df = calculate_revenues_per_child(payment_attendance_processed,
-                                                        days_left)
+    df_dashboard = (
+        payment_attendance.pipe(adjust_school_age_days)
+                          .pipe(calculate_family_days)
+                          .pipe(process_merged_data, month_days, days_left)
+                          .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_e_learning_revenue)
+                          .pipe(calculate_attendance_rate)
+                          .pipe(produce_dashboard_df)
+    )
 
