@@ -115,7 +115,7 @@ def count_days_attended(attendance_df):
             return 0
         if time_checked_in_ < 17:
             return 1
-        if time_checked_in <= 24:
+        if time_checked_in_ <= 24:
             return 2
         else:
             # TODO add separate data validation functions
