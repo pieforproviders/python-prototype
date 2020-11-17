@@ -214,12 +214,24 @@ def calculate_family_days(merged_df):
 
     return merged_df
 
-def process_merged_data(merged_df, month_days, days_left):
-    days_elapsed = month_days - days_left
-    # helper function to categorize
+def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
+    '''
+    Categorizes the attendance risk of a family
+
+    Returns a dataframe with an additional attendance risk column
+    '''
+    days_elapsed = month_days_ - days_left_
+
+    # calculate number of children in the family
+    merged_df['num_children_in_family'] = (
+        merged_df.groupby('case_number')['child_id']
+                 .transform('count')
+    )
+
     def categorize_families(row):
+        # helper function to categorize families
         # not enough information
-        if days_elapsed / month_days < 0.5:
+        if days_elapsed / month_days_ < 0.5:
             return 'Not enough info'
         # sure bet
         elif (
@@ -231,28 +243,24 @@ def process_merged_data(merged_df, month_days, days_left):
         elif (
             ATTENDANCE_THRESHOLD * row['family_total_days_approved']
             - row['family_total_days_attended']
-            > row['family_children'] * days_left
+            > row['num_children_in_family'] * days_left
         ):
             return 'Not met'
         # at risk (using percentage rule based on adjusted attendance rate)
         elif (
             row['family_total_days_attended']
-            / ((days_elapsed / month_days) * row['family_total_days_approved'])
+            / ((days_elapsed / month_days_) * row['family_total_days_approved'])
             < ATTENDANCE_THRESHOLD
         ):
             return 'At risk'
         # on track (all others not falling in above categories)
         else:
             return 'On track'
-        # todo: check that categories are mutually exclusive
 
-    # calculate number of children in the family
-    merged_df['family_children'] = (
-        merged_df.groupby('case_number')['child_id']
-                 .transform('count')
-    )
     # categorize families
     merged_df['attendance_category'] = merged_df.apply(categorize_families, axis=1)
+    # drop col not used in future calculations
+    merged_df = merged_df.drop('num_children_in_family', axis=1)
     return merged_df
 
 def calculate_revenues_per_child(merged_df, days_left):
@@ -386,7 +394,7 @@ def get_dashboard_data():
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
-                          .pipe(process_merged_data, month_days, days_left)
+                          .pipe(categorize_family_attendance_risk, month_days, days_left)
                           .pipe(calculate_revenues_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
@@ -419,7 +427,7 @@ if __name__ == '__main__':
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
-                          .pipe(process_merged_data, month_days, days_left)
+                          .pipe(categorize_family_attendance_risk, month_days, days_left)
                           .pipe(calculate_revenues_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
