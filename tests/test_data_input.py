@@ -20,6 +20,12 @@ def example_attendance_data():
         KeithEllison,2020-09-01,Lil Baby Ducklings,3,34
         LaurenUnderwood,2020-09-02,Lil Baby Ducklings,10,26
         JanSchakowsky,2020-09-02,Lil Baby Ducklings,6,35
+        KamalaHarris,2020-09-02,Lil Baby Ducklings,5,00
+        CoryBooker,2020-09-02,Lil Baby Ducklings,12,00
+        DebHaaland,2020-09-02,Lil Baby Ducklings,13,45
+        GabrielleGifford,2020-09-02,Lil Baby Ducklings,17,00
+        JulianCastro,2020-09-02,Lil Baby Ducklings,20,54
+        JohnLewis,2020-09-02,Lil Baby Ducklings,24,00
         '''
     )
     attendance = pd.read_csv(attendance_data)
@@ -36,10 +42,19 @@ def test_count_days_attended(example_attendance_data):
         JanSchakowsky,2,0
         KeithEllison,0,1
         LaurenUnderwood,1,0
+        KamalaHarris,1,0
+        CoryBooker,1,0
+        DebHaaland,1,1
+        GabrielleGifford,2,0
+        JulianCastro,2,0
+        JohnLewis,2,0
         '''
     )
     expected = pd.read_csv(expected_data, index_col='child_id')
-    assert_frame_equal(count_days_attended(example_attendance_data), expected)
+    assert_frame_equal(
+        count_days_attended(example_attendance_data), expected,
+        check_like=True
+    )
 
 def test_adjust_school_age_days():
     example_df = pd.DataFrame(
