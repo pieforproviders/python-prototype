@@ -9,6 +9,7 @@ from data_input import(
     count_days_attended,
     adjust_school_age_days,
     calculate_family_days,
+    categorize_family_attendance_risk,
     calculate_e_learning_revenue
     )
 
@@ -112,6 +113,34 @@ def test_calculate_family_days():
         }
     )
     assert_frame_equal(calculate_family_days(example_df), expected_df)
+
+class TestCategorizeFamilyAttendanceRisk:
+    def test_not_enough_info(self):
+        month_days = 30
+        days_left = 16
+        cols = [
+                'child_id',
+                'case_number',
+                'family_total_days_approved',
+                'family_total_days_attended',
+        ]
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 1, 1],
+            ],
+            columns=cols
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 1, 1, 'Not enough info']
+            ],
+            columns=cols + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
 
 def test_calculate_e_learning_revenue():
     example_df = pd.DataFrame(
