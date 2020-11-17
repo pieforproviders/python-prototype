@@ -26,7 +26,8 @@ def get_attendance_data():
             'Date',
             'School account',
             'Hours checked in',
-            'Minutes checked in']
+            'Minutes checked in'
+        ]
     )
     # rename columns to standardize column names
     attendance.rename(
@@ -74,8 +75,10 @@ def get_payment_data():
             'Total full day rate': 'full_day_rate',
             'Total part day rate': 'part_day_rate',
             'Co-pay per child': 'copay',
-            'Child ID': 'child_id'},
-        inplace=True)
+            'Child ID': 'child_id'
+        },
+        inplace=True
+    )
     payment['name'] = payment['first_name'] + ' ' + payment['last_name']
     return payment
 
