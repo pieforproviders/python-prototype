@@ -243,7 +243,7 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
         elif (
             ATTENDANCE_THRESHOLD * row['family_total_days_approved']
             - row['family_total_days_attended']
-            > row['num_children_in_family'] * days_left
+            > row['num_children_in_family'] * days_left_
         ):
             return 'Not met'
         # at risk (using percentage rule based on adjusted attendance rate)
