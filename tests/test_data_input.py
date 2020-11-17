@@ -6,7 +6,7 @@ from io import StringIO
 
 from data_input import(
     calculate_month_days,
-    process_attendance_data,
+    count_days_attended,
     adjust_school_age_days,
     calculate_family_days,
     calculate_e_learning_revenue
@@ -30,17 +30,16 @@ def test_calculate_month_days(example_attendance_data):
     expected = (30, 28) # function returns month days, days left
     assert calculate_month_days(example_attendance_data) == expected
 
-def test_process_attendance_data(example_attendance_data):
+def test_count_days_attended(example_attendance_data):
     expected_data = StringIO(
         '''child_id,full_days_attended,part_days_attended
         JanSchakowsky,2,0
         KeithEllison,0,1
         LaurenUnderwood,1,0
-        ''' 
+        '''
     )
     expected = pd.read_csv(expected_data, index_col='child_id')
-    assert_frame_equal(process_attendance_data(example_attendance_data), expected,
-                       check_like=True)
+    assert_frame_equal(count_days_attended(example_attendance_data), expected)
 
 def test_adjust_school_age_days():
     example_df = pd.DataFrame(
@@ -96,7 +95,7 @@ def test_calculate_family_days():
             'family_total_days_approved': [18, 18, 12],
             'family_total_days_attended': [11, 11, 9],
         }
-    )   
+    )
     assert_frame_equal(calculate_family_days(example_df), expected_df)
 
 def test_calculate_e_learning_revenue():

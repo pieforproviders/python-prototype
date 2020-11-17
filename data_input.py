@@ -86,42 +86,49 @@ def calculate_month_days(attendance_df):
     days_left = month_days - max_attended_date.day
     return month_days, days_left
 
-def process_attendance_data(attendance_df):
+def count_days_attended(attendance_df):
+    '''
+    Counts the number of part and full days attended.
+
+    (0,5) hrs: 1 part day
+    [5,12] hrs: 1 full day
+    (12, 17) hrs: 1 full day and 1 part day
+    [17, 24] hrs: 2 full days
+
+    Returns a dataframe with additional columns of full and part days attended.
+    '''
+    time_checked_in = (
+        attendance_df['hours_checked_in'] + (attendance_df['mins_checked_in'] / 60)
+    )
     # count number of part and full days attended
-    def count_part_days(row):
-        time_checked_in = row['hours_checked_in'] + (row['mins_checked_in'] / 60)
-        if time_checked_in < 5:
-            return 1
-        elif (time_checked_in > 12) and (time_checked_in < 17):
+    def count_part_days(time_checked_in_):
+        if (
+            time_checked_in_ < 5
+            or (time_checked_in_ > 12 and time_checked_in_ < 17)
+        ):
             return 1
         else:
             return 0
 
-    def count_full_days(row):
-        time_checked_in = row['hours_checked_in'] + (row['mins_checked_in'] / 60)
-        if time_checked_in < 5:
+    def count_full_days(time_checked_in_):
+        if time_checked_in_ < 5:
             return 0
-        elif time_checked_in <= 12:
+        if time_checked_in_ < 17:
             return 1
-        elif time_checked_in < 17:
-            return 1
-        elif time_checked_in <= 24:
+        if time_checked_in <= 24:
             return 2
         else:
+            # TODO add separate data validation functions
             raise ValueError('Value should not be more than 24')
 
-    attendance_df['part_days_attended'] = attendance_df.apply(
-        count_part_days, axis=1
-    )
-    attendance_df['full_days_attended'] = attendance_df.apply(count_full_days, axis=1)
+    attendance_df['part_days_attended'] = time_checked_in.map(count_part_days)
+    attendance_df['full_days_attended'] = time_checked_in.map(count_full_days)
 
     # aggregate to each child_id
-    attendance_per_child = (
+    return (
         attendance_df.groupby('child_id')[['full_days_attended', 'part_days_attended']]
                      .sum()
     )
-
-    return attendance_per_child
 
 def adjust_school_age_days(merged_df):
     '''
@@ -371,7 +378,7 @@ def get_dashboard_data():
     days_req_for_warnings = math.ceil(month_days/2)
 
     # process data for dashboard
-    attendance_processed = process_attendance_data(attendance_half)
+    attendance_processed = count_days_attended(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
@@ -404,7 +411,7 @@ if __name__ == '__main__':
     days_req_for_warnings = math.ceil(month_days/2)
 
     # process data for dashboard
-    attendance_processed = process_attendance_data(attendance_half)
+    attendance_processed = count_days_attended(attendance_half)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
