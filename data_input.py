@@ -104,7 +104,7 @@ def count_days_attended(attendance_df):
     def count_part_days(time_checked_in_):
         if (
             time_checked_in_ < 5
-            or (time_checked_in_ > 12 and time_checked_in_ < 17)
+            or  12 < time_checked_in_ < 17
         ):
             return 1
         else:
