@@ -29,26 +29,36 @@ def make_attendance_table(df):
         on_track_pct = on_track_count / total_count
 
     # make table
-    label_col = ['Sure bet',
-                 'On track',
-                 'At risk',
-                 'Not met']
-    pct_col = [sure_bet_pct,
-               on_track_pct,
-               at_risk_pct,
-               not_met_pct]
-    count_col = [sure_bet_count,
-                 on_track_count,
-                 at_risk_count,
-                 not_met_count]
-    df_table = pd.DataFrame({
-        'attendance_category': label_col,
-        'percentage': pct_col,
-        'count': count_col}) 
+    label_col = [
+        'Sure bet',
+        'On track',
+        'At risk',
+        'Not met'
+    ]
+    pct_col = [
+        sure_bet_pct,
+        on_track_pct,
+        at_risk_pct,
+        not_met_pct
+    ]
+    count_col = [
+        sure_bet_count,
+        on_track_count,
+        at_risk_count,
+        not_met_count
+    ]
+    df_table = pd.DataFrame(
+        {
+            'attendance_category': label_col,
+            'percentage': pct_col,
+            'count': count_col
+        }
+    )
 
     table = dash_table.DataTable(
         id='summary',
-        columns=[{
+        columns=[
+            {
                 'id': 'attendance_category',
                 'name': 'Attendance risk',
                 'type': 'text'
@@ -86,34 +96,38 @@ def make_revenue_chart(df):
     potential_max_delta = max_approved_revenue_sum - potential_revenue_sum
 
     trace_min = go.Bar(
-                    name=('Guaranteed revenue <br>'
-                        + '$' + str(round(min_revenue_sum))
-                    ),
-                    y=['revenue'],
-                    x=[min_revenue_sum],
-                    width=[0.3],
-                    orientation='h',
-                    marker_color='rgb(0,110,160)')
+        name=(
+            'Guaranteed revenue <br>' + '$' + str(round(min_revenue_sum))
+        ),
+        y=['revenue'],
+        x=[min_revenue_sum],
+        width=[0.3],
+        orientation='h',
+        marker_color='rgb(0,110,160)'
+    )
     trace_potential = go.Bar(
-                        name=('Potential revenue <br>' 
-                            + '$' + str(round(potential_revenue_sum))
-                        ),
-                        y=['revenue'],
-                        x=[min_potential_delta],
-                        width=[0.3],
-                        orientation='h',
-                        marker_color='rgb(56,178,234)')
+        name=(
+            'Potential revenue <br>' + '$' + str(round(potential_revenue_sum))
+        ),
+        y=['revenue'],
+        x=[min_potential_delta],
+        width=[0.3],
+        orientation='h',
+        marker_color='rgb(56,178,234)'
+    )
     trace_max = go.Bar(
-                    name=('Max. revenue approved <br>'
-                        + '$' + str(round(max_approved_revenue_sum))
-                    ),
-                    y=['revenue'],
-                    x=[potential_max_delta],
-                    width=[0.3],
-                    orientation='h',
-                    marker_color='rgb(204,239,255)')
+        name=(
+            'Max. revenue approved <br>' + '$' + str(round(max_approved_revenue_sum))
+        ),
+        y=['revenue'],
+        x=[potential_max_delta],
+        width=[0.3],
+        orientation='h',
+        marker_color='rgb(204,239,255)'
+    )
     trace_elearning = go.Bar(
-        name=('Potential e-learning revenue <br>'
+        name=(
+            'Potential e-learning revenue <br>'
             + '$' + str(round(potential_e_learning_revenue_sum))
         ),
         y=['revenue'],
@@ -125,132 +139,139 @@ def make_revenue_chart(df):
 
     data = [trace_min, trace_potential, trace_max, trace_elearning]
     layout = go.Layout(
-                barmode='stack',
-                yaxis={'visible':False,
-                       'showticklabels':False,
-                       'fixedrange':True},
-                xaxis={'showgrid':False,
-                       'visible':False,
-                       'showticklabels':False,
-                       'fixedrange':True,},
-                plot_bgcolor='rgb(255,255,255)',
-                margin={
-                    'l':0,
-                    'r':0,
-                    't':0,
-                    'b':0,
-                },
-                legend={'orientation':'h',
-                        'traceorder':'normal'},
-                hovermode=False,
-                font={'size':16},
-                height=200,
-                )
+        barmode='stack',
+        yaxis={
+            'visible':False,
+            'showticklabels':False,
+            'fixedrange':True
+        },
+        xaxis={
+            'showgrid':False,
+            'visible':False,
+            'showticklabels':False,
+            'fixedrange':True,
+        },
+        plot_bgcolor='rgb(255,255,255)',
+        margin={
+            'l':0,
+            'r':0,
+            't':0,
+            'b':0,
+        },
+        legend={
+            'orientation':'h',
+            'traceorder':'normal'
+        },
+        hovermode=False,
+        font={'size':16},
+        height=200,
+    )
     fig = go.Figure(data=data, layout=layout)
     return dcc.Graph(
         figure=fig,
         config={'displayModeBar':False},
     )
-    
+
 
 # child level table
 def make_table(df):
     table = dash_table.DataTable(
-                    id='child_level',
-                    data=df.to_dict('records'),
-                    columns=[{
-                        'id': 'name',
-                        'name': 'Child name',
-                        'type': 'text'
-                    }, {
-                        'id': 'case_number',
-                        'name': 'Case number',
-                        'type': 'text'
-                    }, {
-                        'id': 'biz_name',
-                        'name': 'Business',
-                        'type': 'text'
-                    }, {
-                        'id': 'attendance_category',
-                        'name': 'Attendance risk',
-                        'type': 'text'
-                    }, {
-                        'id': 'attendance_rate',
-                        'name': 'Attendance rate',
-                        'type': 'numeric',
-                        'format': FormatTemplate.percentage(0)
-                    }, {
-                        'id': 'min_revenue',
-                        'name': 'Guaranteed revenue',
-                        'type': 'numeric',
-                        'format': FormatTemplate.money(2)
-                    },  {
-                        'id': 'potential_revenue',
-                        'name': 'Potential revenue',
-                        'type': 'numeric',
-                        'format': FormatTemplate.money(2)
-                    }, {
-                        'id': 'max_monthly_payment',
-                        'name': 'Max. revenue approved',
-                        'type': 'numeric',
-                        'format': FormatTemplate.money(2)
-                    }, {
-                        'id': 'e_learning_revenue_potential',
-                        'name': 'Potential e-learning revenue',
-                        'type': 'numeric',
-                        'format': FormatTemplate.money(2)
-                    }],
-                    style_data_conditional=[
-                        {
-                            'if': {
-                                'filter_query': '{attendance_category} = "Not enough info"',
-                                'column_id': 'attendance_category'
-                            },
-                            'backgroundColor': 'rgb(248, 248, 248)',
-                            'color': 'rgb(128,128,128)'
-                        },
-                        {
-                            'if': {
-                                'filter_query': '{attendance_category} = "Sure bet"',
-                                'column_id': 'attendance_category' 
-                            },
-                            'color': 'darkgreen'
-                        },
-                        {
-                            'if': {
-                                'filter_query': '{attendance_category} = "Not met"',
-                                'column_id': 'attendance_category' 
-                            },
-                            'color': '#FF4136'
-                        },
-                        {
-                            'if': {
-                                'filter_query': '{attendance_category} = "At risk"',
-                                'column_id': 'attendance_category' 
-                            },
-                            'color': '#FF851B'
-                        },
-                        {
-                            'if': {
-                                'filter_query': '{attendance_category} = "On track"',
-                                'column_id': 'attendance_category' 
-                            },
-                            'color': '#2ECC40'
-                        }
-                    ],
-                    style_header={
-                        'whiteSpace': 'normal',
-                        'height': 'auto',
-                        'maxWidth': '100px',
-                    },
-                    style_table=
-                        {
-                            'padding': '20px',
-                            'overflowX': 'auto',
-                        },
-                    sort_action='native',
-                    sort_mode='single',
-                )
+        id='child_level',
+        data=df.to_dict('records'),
+        columns=[
+            {
+                'id': 'name',
+                'name': 'Child name',
+                'type': 'text'
+            }, {
+                'id': 'case_number',
+                'name': 'Case number',
+                'type': 'text'
+            }, {
+                'id': 'biz_name',
+                'name': 'Business',
+                'type': 'text'
+            }, {
+                'id': 'attendance_category',
+                'name': 'Attendance risk',
+                'type': 'text'
+            }, {
+                'id': 'attendance_rate',
+                'name': 'Attendance rate',
+                'type': 'numeric',
+                'format': FormatTemplate.percentage(0)
+            }, {
+                'id': 'min_revenue',
+                'name': 'Guaranteed revenue',
+                'type': 'numeric',
+                'format': FormatTemplate.money(2)
+            }, {
+                'id': 'potential_revenue',
+                'name': 'Potential revenue',
+                'type': 'numeric',
+                'format': FormatTemplate.money(2)
+            }, {
+                'id': 'max_monthly_payment',
+                'name': 'Max. revenue approved',
+                'type': 'numeric',
+                'format': FormatTemplate.money(2)
+            }, {
+                'id': 'e_learning_revenue_potential',
+                'name': 'Potential e-learning revenue',
+                'type': 'numeric',
+                'format': FormatTemplate.money(2)
+            }
+        ],
+        style_data_conditional=[
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Not enough info"',
+                    'column_id': 'attendance_category'
+                },
+                'backgroundColor': 'rgb(248, 248, 248)',
+                'color': 'rgb(128,128,128)'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Sure bet"',
+                    'column_id': 'attendance_category'
+                },
+                'color': 'darkgreen'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Not met"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#FF4136'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "At risk"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#FF851B'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "On track"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#2ECC40'
+            }
+        ],
+        style_header={
+            'whiteSpace': 'normal',
+            'height': 'auto',
+            'maxWidth': '100px',
+        },
+        style_table={
+            'padding': '20px',
+            'overflowX': 'auto',
+        },
+        sort_action='native',
+        sort_mode='single',
+    )
     return table
 
 if __name__ == '__main__':
@@ -259,7 +280,5 @@ if __name__ == '__main__':
 
     # fig = make_revenue_chart(df_dashboard)
     # fig.show()
-    
+
     make_attendance_table(df_dashboard)
-
-
