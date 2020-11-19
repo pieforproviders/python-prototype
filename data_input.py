@@ -189,19 +189,19 @@ def calculate_family_days(merged_df):
     # calculate family level days approved and attended
     merged_df['family_full_days_approved'] = (
         merged_df.groupby('case_number')['adj_full_days_approved']
-                 .transform(lambda x: np.sum(x))
+                 .transform(np.sum)
     )
     merged_df['family_full_days_attended'] = (
         merged_df.groupby('case_number')['full_days_attended']
-                 .transform(lambda x: np.sum(x))
+                 .transform(np.sum)
     )
     merged_df['family_part_days_approved'] = (
         merged_df.groupby('case_number')['adj_part_days_approved']
-                 .transform(lambda x: np.sum(x))
+                 .transform(np.sum)
     )
     merged_df['family_part_days_attended'] = (
         merged_df.groupby('case_number')['part_days_attended']
-                 .transform(lambda x: np.sum(x))
+                 .transform(np.sum)
     )
 
     # calculate total family days
