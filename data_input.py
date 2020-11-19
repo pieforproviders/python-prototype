@@ -286,8 +286,32 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
     merged_df = merged_df.drop('num_children_in_family', axis=1)
     return merged_df
 
-def calculate_revenues_per_child(merged_df, days_left):
-    # helper functions to calculate revenue
+def calculate_min_revenue_per_child(merged_df):
+    '''
+    Calculates the minimum (guaranteed revenue) per child.
+
+    Returns a dataframe with an additional min revenue column.
+    '''
+    def calculate_min_revenue(row):
+        # min revenue is attended days * rate, unless sure bet
+        # full day
+        if row['attendance_category'] == 'Sure bet':
+            full_day_min_revenue = row['full_days_approved'] * row['full_day_rate']
+            part_day_min_revenue = row['part_days_approved'] * row['part_day_rate']
+        else:
+            full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
+            part_day_min_revenue = row['part_days_attended'] * row['part_day_rate']
+        return full_day_min_revenue + part_day_min_revenue - row['copay']
+
+    merged_df['min_revenue'] = merged_df.apply(calculate_min_revenue, axis=1)
+    return merged_df
+
+def calculate_potential_revenue_per_child(merged_df, days_left_):
+    '''
+    Calculates the potential revenue per child.
+
+    Returns a dataframe with an additional potential revenue column.
+    '''
     def calculate_potential_revenue(row, days_left):
         # potential revenue is approved days * rate unless threshold is already not met
         if row['attendance_category'] == 'Not met':
@@ -324,25 +348,11 @@ def calculate_revenues_per_child(merged_df, days_left):
             )
         return full_day_potential_revenue + part_day_potential_revenue - row['copay']
 
-    def calculate_min_revenue(row):
-        # min revenue is attended days * rate, unless sure bet
-        # full day
-        if row['attendance_category'] == 'Sure bet':
-            full_day_min_revenue = row['full_days_approved'] * row['full_day_rate']
-            part_day_min_revenue = row['part_days_approved'] * row['part_day_rate']
-        else:
-            full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
-            part_day_min_revenue = row['part_days_attended'] * row['part_day_rate']
-        return full_day_min_revenue + part_day_min_revenue - row['copay']
-
-    # calculate revenues at child level
     merged_df['potential_revenue'] = merged_df.apply(
         calculate_potential_revenue,
-        args=[days_left],
+        args=[days_left_],
         axis=1
     )
-    merged_df['min_revenue'] = merged_df.apply(calculate_min_revenue, axis=1)
-
     return merged_df
 
 def calculate_e_learning_revenue(merged_df):
@@ -418,7 +428,8 @@ def get_dashboard_data():
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, month_days, days_left)
-                          .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_min_revenue_per_child)
+                          .pipe(calculate_potential_revenue_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
                           .pipe(produce_dashboard_df)
@@ -451,7 +462,8 @@ if __name__ == '__main__':
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, month_days, days_left)
-                          .pipe(calculate_revenues_per_child, days_left)
+                          .pipe(calculate_min_revenue_per_child)
+                          .pipe(calculate_potential_revenue_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
                           .pipe(produce_dashboard_df)
