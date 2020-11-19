@@ -19,6 +19,7 @@ attendance_file = os.environ.get('ATTENDANCE_FILE')
 payment_file = os.environ.get('PAYMENT_FILE')
 
 def get_attendance_data():
+    '''Reads in and processes attendance data'''
     attendance = pd.read_csv(
         DATA_PATH.joinpath(user_dir, attendance_file),
         usecols=[
@@ -43,6 +44,7 @@ def get_attendance_data():
     return attendance
 
 def get_payment_data():
+    ''' Reads in and processes payment data'''
     payment = pd.read_csv(
         DATA_PATH.joinpath(user_dir, payment_file),
         skiprows=1,
@@ -83,7 +85,7 @@ def get_payment_data():
     return payment
 
 def calculate_month_days(attendance_df):
-    # calculate days left and month
+    ''' Calculate days in month and days left from max attendance date'''
     max_attended_date = attendance_df['date'].max()
     month_days = max_attended_date.daysinmonth
     days_left = month_days - max_attended_date.day
@@ -380,14 +382,14 @@ def calculate_e_learning_revenue(merged_df):
     return merged_df
 
 def calculate_attendance_rate(df):
-    # part day
+    ''' Calculate family attendance rate'''
     df['attendance_rate'] = (
         df['family_total_days_attended'] / df['family_total_days_approved']
     )
     return df
 
 def produce_dashboard_df(df):
-    # filter to required columns
+    ''' Filter to required columns for dashboard'''
     cols_to_keep = [
         'name',
         'case_number',
@@ -403,6 +405,7 @@ def produce_dashboard_df(df):
     return df_sub
 
 def get_dashboard_data():
+    ''' Returns data for dashboard'''
     attendance = get_attendance_data()
     payment = get_payment_data()
 
