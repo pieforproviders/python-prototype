@@ -80,7 +80,11 @@ def make_attendance_table(df):
             }
         ],
         data=df_table.to_dict('records'),
-        style_as_list_view=True
+        style_as_list_view=True,
+        style_table={
+            'overflowX': 'auto',
+            'padding':'20px'
+        }
     )
     return table
 
