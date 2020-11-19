@@ -13,7 +13,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 from data_input import get_dashboard_data
-from make_figures import make_table, make_revenue_chart, make_attendance_table 
+from make_figures import make_table, make_revenue_chart, make_attendance_table
 
 # load environment variables
 username = os.environ.get('USERNAME')
@@ -68,7 +68,7 @@ attendance_summary_card = dbc.Card(
                         style={'font-size': '1.5rem'}),
                 summary_table
             ]
-        )  
+        )
     ],
     className='h-100',
 )
@@ -81,7 +81,7 @@ revenue_summary_card = dbc.Card(
                         style={'font-size': '1.5rem'}),
                 revenue_chart
             ]
-        )  
+        )
     ],
     className='h-100',
 )
@@ -100,11 +100,11 @@ attendance_copy_card = dbc.Card(
         ),
         dbc.Collapse(
             dbc.CardBody(
-                [   
+                [
                     html.P(
                         [
                             html.Strong('Sure bet: '),
-                            html.Span('attendance rate met - maximum payment expected!')
+                            html.Span('maximum payment expected! Based on attendance rate for full and part days')
                         ]
                     ),
                     html.P(
@@ -124,11 +124,11 @@ attendance_copy_card = dbc.Card(
                             html.Strong('Not met: '),
                             html.Span("full payment not possible; you'll get paid for days attended only")
                         ]
-                    ),  
+                    ),
                      html.P(
                         [
                             html.Strong('Not enough info: '),
-                            html.Span('email us ' + str(days_req_for_warnings) 
+                            html.Span('email us ' + str(days_req_for_warnings)
                                         + '+ days of attendance records to get projections')
                         ]
                     )
@@ -168,7 +168,7 @@ revenue_copy_card = dbc.Card(
                     html.P(
                         [
                             html.Strong('Max. approved revenue: '),
-                            html.Span('if all children meet 80% attendance rate')
+                            html.Span('if all families meet 50% attendance rate')
                         ]
                     ),
                     html.P(
@@ -212,7 +212,7 @@ app.layout = html.Div(
     [
         navbar,
         dbc.Container(
-            [   
+            [
                 html.H1(children='Your dashboard'),
 
                 html.H2('Estimates as of ' + latest_date,
@@ -220,7 +220,7 @@ app.layout = html.Div(
 
                 html.Div(
                     dbc.Alert('At-risk case warnings will be available with '
-                                + str(days_req_for_warnings) 
+                                + str(days_req_for_warnings)
                                 + ' days of attendance data',
                                 color='warning',
                                 is_open=is_data_insufficient)
