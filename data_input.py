@@ -234,9 +234,33 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
         if days_elapsed / month_days_ < 0.5:
             return 'Not enough info'
         # sure bet
-        elif (
+        if (
+            # condition 1: attendance rate >= threshold
             row['family_total_days_attended'] / row['family_total_days_approved']
             >= ATTENDANCE_THRESHOLD
+            # condition 2: child is one of 3 types below
+            and (
+                # child is approved for only full days and attended at least 1 full day
+                (
+                    row['adj_full_days_approved'] > 0
+                    and row['full_days_attended'] > 0
+                    and row['adj_part_days_approved'] == 0
+                )
+                # child is approved for only part days and attended at least 1 part day
+                or (
+                    row['adj_part_days_approved'] > 0
+                    and row['part_days_attended'] > 0
+                    and row['adj_full_days_approved'] == 0
+                )
+                # child is approved for both full and part days and
+                # attended at least 1 full day and 1 part day
+                or (
+                    row['adj_full_days_approved'] > 0
+                    and row['adj_part_days_approved'] > 0
+                    and row['full_days_attended'] > 0
+                    and row['part_days_attended'] > 0
+                )
+            )
         ):
             return 'Sure bet'
         # not met
