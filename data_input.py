@@ -440,34 +440,4 @@ def get_dashboard_data():
     return df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings
 
 if __name__ == '__main__':
-    attendance = get_attendance_data()
-    payment = get_payment_data()
-
-    # subset attendance to half month to simulate having onlf half month data
-    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
-
-    # get latest date in attendance data
-    latest_date = attendance_half['date'].max().strftime('%b %d %Y')
-
-    # calculate days in month and days left in month
-    month_days, days_left = calculate_month_days(attendance_half)
-
-    # check if data is insufficient
-    is_data_insufficient = (month_days - days_left)/month_days < 0.5
-
-    # calculate number of days required for at-risk warnings to be shown
-    days_req_for_warnings = math.ceil(month_days/2)
-
-    # process data for dashboard
-    attendance_processed = count_days_attended(attendance_half)
-    payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
-    df_dashboard = (
-        payment_attendance.pipe(adjust_school_age_days)
-                          .pipe(calculate_family_days)
-                          .pipe(categorize_family_attendance_risk, month_days, days_left)
-                          .pipe(calculate_min_revenue_per_child)
-                          .pipe(calculate_potential_revenue_per_child, days_left)
-                          .pipe(calculate_e_learning_revenue)
-                          .pipe(calculate_attendance_rate)
-                          .pipe(produce_dashboard_df)
-    )
+    get_dashboard_data()
