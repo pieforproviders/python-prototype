@@ -115,27 +115,186 @@ def test_calculate_family_days():
     assert_frame_equal(calculate_family_days(example_df), expected_df)
 
 class TestCategorizeFamilyAttendanceRisk:
-    def test_not_enough_info(self):
-        month_days = 30
-        days_left = 16
-        cols = [
+    def setup_class(self):
+        self.columns = [
                 'child_id',
                 'case_number',
+                'adj_full_days_approved',
+                'adj_part_days_approved',
+                'full_days_attended',
+                'part_days_attended',
                 'family_total_days_approved',
                 'family_total_days_attended',
         ]
+
+    def test_not_enough_info(self):
+        month_days = 30
+        days_left = 16
         example_df = pd.DataFrame(
             [
-                ['a', '01', 1, 1],
+                ['a', '01', 1, 1, 1, 1, 2, 2],
             ],
-            columns=cols
+            columns=self.columns
         )
 
         expected_df = pd.DataFrame(
             [
-                ['a', '01', 1, 1, 'Not enough info']
+                ['a', '01', 1, 1, 1, 1, 2, 2, 'Not enough info']
             ],
-            columns=cols + ['attendance_category']
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_sure_bet_only_full(self):
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 1, 0, 1, 0, 1, 1],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 1, 0, 1, 0, 1, 1, 'Sure bet']
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_sure_bet_only_part(self):
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 1, 0, 1, 1, 1],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 1, 0, 1, 1, 1, 'Sure bet']
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_sure_bet_part_and_full(self):
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 1, 1, 1, 1, 2, 2],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 1, 1, 1, 1, 2, 2, 'Sure bet']
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_not_met(self):
+        # test case example from initial_rules_visualization doc
+        month_days = 30
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 15, 0, 1, 0, 30, 2],
+                ['b', '01', 15, 0, 1, 0, 30, 2],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 15, 0, 1, 0, 30, 2, 'Not met'],
+                ['b', '01', 15, 0, 1, 0, 30, 2, 'Not met'],
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_at_risk(self):
+        # test case example from initial_rules_visualization doc
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 15, 0, 7, 0, 30, 8],
+                ['b', '01', 15, 0, 1, 0, 30, 8],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 15, 0, 7, 0, 30, 8, 'At risk'],
+                ['b', '01', 15, 0, 1, 0, 30, 8, 'At risk'],
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_on_track_threshold_met_no_full_attendance(self):
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 8, 0, 8, 10, 8],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 8, 0, 8, 10, 8, 'On track'],
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+    def test_on_track_threshold_met_no_part_attendance(self):
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 8, 2, 8, 0, 10, 8],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 8, 2, 8, 0, 10, 8, 'On track'],
+            ],
+            columns=self.columns + ['attendance_category']
         )
         assert_frame_equal(
             categorize_family_attendance_risk(example_df, month_days, days_left),
