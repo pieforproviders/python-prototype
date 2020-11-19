@@ -264,22 +264,21 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
         ):
             return 'Sure bet'
         # not met
-        elif (
+        if (
             ATTENDANCE_THRESHOLD * row['family_total_days_approved']
             - row['family_total_days_attended']
             > row['num_children_in_family'] * days_left_
         ):
             return 'Not met'
         # at risk (using percentage rule based on adjusted attendance rate)
-        elif (
+        if (
             row['family_total_days_attended']
             / ((days_elapsed / month_days_) * row['family_total_days_approved'])
             < ATTENDANCE_THRESHOLD
         ):
             return 'At risk'
         # on track (all others not falling in above categories)
-        else:
-            return 'On track'
+        return 'On track'
 
     # categorize families
     merged_df['attendance_category'] = merged_df.apply(categorize_families, axis=1)
