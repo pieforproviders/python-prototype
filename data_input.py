@@ -298,8 +298,8 @@ def calculate_min_revenue_per_child(merged_df):
         # min revenue is attended days * rate, unless sure bet
         # full day
         if row['attendance_category'] == 'Sure bet':
-            full_day_min_revenue = row['full_days_approved'] * row['full_day_rate']
-            part_day_min_revenue = row['part_days_approved'] * row['part_day_rate']
+            full_day_min_revenue = row['adj_full_days_approved'] * row['full_day_rate']
+            part_day_min_revenue = row['adj_part_days_approved'] * row['part_day_rate']
         else:
             full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
             part_day_min_revenue = row['part_days_attended'] * row['part_day_rate']
@@ -318,10 +318,10 @@ def calculate_potential_revenue_per_child(merged_df, days_left_):
         # potential revenue is approved days * rate unless threshold is already not met
         if row['attendance_category'] == 'Not met':
             full_days_difference = (
-                row['full_days_approved'] - row['full_days_attended']
+                row['adj_full_days_approved'] - row['full_days_attended']
             )
             part_days_difference = (
-                row['part_days_approved'] - row['part_days_attended']
+                row['adj_part_days_approved'] - row['part_days_attended']
             )
             potential_revenue_full_days = np.min(
                 days_left, full_days_difference
@@ -343,10 +343,10 @@ def calculate_potential_revenue_per_child(merged_df, days_left_):
             )
         else:
             full_day_potential_revenue = (
-                row['full_days_approved'] * row['full_day_rate']
+                row['adj_full_days_approved'] * row['full_day_rate']
             )
             part_day_potential_revenue = (
-                row['part_days_approved'] * row['part_day_rate']
+                row['adj_part_days_approved'] * row['part_day_rate']
             )
         return full_day_potential_revenue + part_day_potential_revenue - row['copay']
 
@@ -410,7 +410,7 @@ def get_dashboard_data():
     payment = get_payment_data()
 
     # subset attendance to half month to simulate having onlf half month data
-    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
+    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-28'), :].copy()
 
     # get latest date in attendance data
     latest_date = attendance_half['date'].max().strftime('%b %d %Y')
