@@ -84,7 +84,37 @@ def make_attendance_table(df):
         style_table={
             'overflowX': 'auto',
             'padding':'20px'
-        }
+        },
+        style_data_conditional=[
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Sure bet"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#0f8c48'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Not met"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#da5d4f'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "At risk"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#da5d4f'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "On track"',
+                    'column_id': 'attendance_category'
+                },
+                'color': '#0f8c48'
+            }
+        ]
     )
     return table
 
@@ -240,29 +270,57 @@ def make_table(df):
                     'filter_query': '{attendance_category} = "Sure bet"',
                     'column_id': 'attendance_category'
                 },
-                'color': 'darkgreen'
+                'color': '#0f8c48'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Sure bet"',
+                    'column_id': 'attendance_rate'
+                },
+                'color': '#0f8c48'
             },
             {
                 'if': {
                     'filter_query': '{attendance_category} = "Not met"',
                     'column_id': 'attendance_category'
                 },
-                'color': '#FF4136'
+                'color': '#da5d4f'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "Not met"',
+                    'column_id': 'attendance_rate'
+                },
+                'color': '#da5d4f'
             },
             {
                 'if': {
                     'filter_query': '{attendance_category} = "At risk"',
                     'column_id': 'attendance_category'
                 },
-                'color': '#FF851B'
+                'color': '#da5d4f'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "At risk"',
+                    'column_id': 'attendance_rate'
+                },
+                'color': '#da5d4f'
             },
             {
                 'if': {
                     'filter_query': '{attendance_category} = "On track"',
                     'column_id': 'attendance_category'
                 },
-                'color': '#2ECC40'
-            }
+                'color': '#0f8c48'
+            },
+            {
+                'if': {
+                    'filter_query': '{attendance_category} = "On track"',
+                    'column_id': 'attendance_rate'
+                },
+                'color': '#0f8c48'
+            },
         ],
         style_header={
             'whiteSpace': 'normal',

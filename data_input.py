@@ -410,7 +410,7 @@ def get_dashboard_data():
     payment = get_payment_data()
 
     # subset attendance to half month to simulate having onlf half month data
-    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-13'), :].copy()
+    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-15'), :].copy()
 
     # get latest date in attendance data
     latest_date = attendance_half['date'].max().strftime('%b %d %Y')
