@@ -34,6 +34,7 @@ summary_table = make_attendance_table(df_dashboard)
 # dash app
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.title = 'Dashboard - Pie for Providers'
 auth = dash_auth.BasicAuth(
     app,
     {username: password}
