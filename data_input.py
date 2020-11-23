@@ -323,11 +323,11 @@ def calculate_potential_revenue_per_child(merged_df, days_left_):
             part_days_difference = (
                 row['adj_part_days_approved'] - row['part_days_attended']
             )
-            potential_revenue_full_days = np.min(
+            potential_revenue_full_days = np.minimum(
                 days_left, full_days_difference
             )
             if full_days_difference < days_left:
-                potential_revenue_part_days = np.min(
+                potential_revenue_part_days = np.minimum(
                     days_left - full_days_difference,
                     part_days_difference
                 )
@@ -410,7 +410,7 @@ def get_dashboard_data():
     payment = get_payment_data()
 
     # subset attendance to half month to simulate having onlf half month data
-    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-28'), :].copy()
+    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-29'), :].copy()
 
     # get latest date in attendance data
     latest_date = attendance_half['date'].max().strftime('%b %d %Y')
