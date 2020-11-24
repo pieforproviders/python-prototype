@@ -10,6 +10,7 @@ from data_input import(
     adjust_school_age_days,
     calculate_family_days,
     categorize_family_attendance_risk,
+    calculate_potential_revenue_per_child,
     calculate_e_learning_revenue
     )
 
@@ -298,6 +299,123 @@ class TestCategorizeFamilyAttendanceRisk:
         )
         assert_frame_equal(
             categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+class TestCalculatePotentialRevenuePerChild:
+    def setup_class(self):
+        self.columns = [
+            'child_id',
+            'case_number',
+            'adj_full_days_approved',
+            'adj_part_days_approved',
+            'full_days_attended',
+            'part_days_attended',
+            'attendance_category',
+            'full_day_rate',
+            'part_day_rate',
+            'copay',
+        ]
+
+    def test_other_category(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 20.0, 10.0, 5.0]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 20.0, 10.0, 5.0, 245.0]
+            ],
+            columns=self.columns + ['potential_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_potential_revenue_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_all_potential_full_days(self):
+        # test case from initial_rules_visualization doc
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 1, 1, 'Not met', 20.0, 10.0, 5.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 1, 1, 'Not met', 20.0, 10.0, 5.0, 125.0],
+            ],
+            columns=self.columns + ['potential_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_potential_revenue_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_potential_full_and_part_days(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 20, 1, 1, 'Not met', 20.0, 10.0, 5.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 20, 1, 1, 'Not met', 20.0, 10.0, 5.0, 85.0],
+            ],
+            columns=self.columns + ['potential_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_potential_revenue_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_only_full_days_approved(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 20, 0, 1, 0, 'Not met', 20.0, 10.0, 5.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 20, 0, 1, 0, 'Not met', 20.0, 10.0, 5.0, 115.0],
+            ],
+            columns=self.columns + ['potential_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_potential_revenue_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_only_part_days_approved(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 20, 0, 1, 'Not met', 20.0, 10.0, 5.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 20, 0, 1, 'Not met', 20.0, 10.0, 5.0, 55.0],
+            ],
+            columns=self.columns + ['potential_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_potential_revenue_per_child(example_df, days_left),
             expected_df
         )
 
