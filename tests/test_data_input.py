@@ -11,7 +11,8 @@ from data_input import(
     calculate_family_days,
     categorize_family_attendance_risk,
     calculate_potential_revenue_per_child,
-    calculate_e_learning_revenue
+    calculate_e_learning_revenue,
+    calculate_attendance_rate,
     )
 
 @pytest.fixture
@@ -443,3 +444,25 @@ def test_calculate_e_learning_revenue():
         }
     )
     assert_frame_equal(calculate_e_learning_revenue(example_df), expected_df)
+
+def test_calculate_attendance_rate():
+    example_df = pd.DataFrame(
+        [
+            ['a', '01', 10, 5]
+        ],
+        columns=[
+            'child_id', 'case_number', 'family_total_days_approved',
+            'family_total_days_attended'
+        ]
+    )
+    expected_df = pd.DataFrame(
+        [
+            ['a', '01', 10, 5, 0.5]
+        ],
+        columns=[
+            'child_id', 'case_number', 'family_total_days_approved',
+            'family_total_days_attended', 'attendance_rate'
+        ]
+    )
+
+    assert_frame_equal(calculate_attendance_rate(example_df), expected_df)
