@@ -23,24 +23,30 @@ def get_attendance_data():
     attendance = pd.read_csv(
         DATA_PATH.joinpath(user_dir, attendance_file),
         usecols=[
-            'Child ID',
-            'Date',
-            'School account',
-            'Hours checked in',
-            'Minutes checked in'
+            'First name',
+            'Last name',
+            'Check in time',
+            'Check in date',
+            'Check out time',
+            'Check out date',
+            'Hours in care',
+            'Minutes in care',
         ]
     )
     # rename columns to standardize column names
     attendance.rename(
         columns={
-            'Child ID': 'child_id',
-            'Date': 'date',
-            'School account': 'biz_name',
-            'Hours checked in': 'hours_checked_in',
-            'Minutes checked in': 'mins_checked_in'},
+            'First name': 'first_name',
+            'Last name': 'last_name',
+            'Check in time': 'check_in_time',
+            'Check in date': 'check_in_date',
+            'Check out time': 'check_out_time',
+            'Check out date': 'check_out_date',
+            'Hours in care': 'hours_checked_in',
+            'Minutes in care': 'mins_checked_in',
+        },
         inplace=True
     )
-    attendance['date'] = pd.to_datetime(attendance['date'])
     return attendance
 
 def get_payment_data():
@@ -50,34 +56,30 @@ def get_payment_data():
         skiprows=1,
         usecols=[
             'Business Name',
-            'First name**',
-            'Last name**',
-            'School age**',
-            'Case number**',
-            'Full days approved**',
-            'Part days (or school days) approved**',
-            'Maximum monthly payment',
+            'First name',
+            'Last name',
+            'School age',
+            'Case number',
+            'Full days approved',
+            'Part days (or school days) approved',
             'Total full day rate',
             'Total part day rate',
             'Co-pay per child',
-            'Child ID'
         ]
     )
     # rename columns to standardize column names
     payment.rename(
         columns={
             'Business Name': 'biz_name',
-            'First name**': 'first_name',
-            'Last name**': 'last_name',
-            'School age**': 'school_age',
-            'Case number**': 'case_number',
-            'Full days approved**': 'full_days_approved',
-            'Part days (or school days) approved**': 'part_days_approved',
-            'Maximum monthly payment': 'max_monthly_payment',
+            'First name': 'first_name',
+            'Last name': 'last_name',
+            'School age': 'school_age',
+            'Case number': 'case_number',
+            'Full days approved': 'full_days_approved',
+            'Part days (or school days) approved': 'part_days_approved',
             'Total full day rate': 'full_day_rate',
             'Total part day rate': 'part_day_rate',
             'Co-pay per child': 'copay',
-            'Child ID': 'child_id'
         },
         inplace=True
     )
@@ -409,14 +411,11 @@ def get_dashboard_data():
     attendance = get_attendance_data()
     payment = get_payment_data()
 
-    # subset attendance to half month to simulate having onlf half month data
-    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-29'), :].copy()
-
     # get latest date in attendance data
-    latest_date = attendance_half['date'].max().strftime('%b %d %Y')
+    latest_date = attendance['date'].max().strftime('%b %d %Y')
 
     # calculate days in month and days left in month
-    month_days, days_left = calculate_month_days(attendance_half)
+    month_days, days_left = calculate_month_days(attendance)
 
     # check if data is insufficient
     is_data_insufficient = (month_days - days_left)/month_days < 0.5
@@ -425,7 +424,7 @@ def get_dashboard_data():
     days_req_for_warnings = math.ceil(month_days/2)
 
     # process data for dashboard
-    attendance_processed = count_days_attended(attendance_half)
+    attendance_processed = count_days_attended(attendance)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
