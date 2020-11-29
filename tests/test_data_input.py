@@ -10,6 +10,7 @@ from data_input import(
     adjust_school_age_days,
     calculate_family_days,
     categorize_family_attendance_risk,
+    calculate_max_revenue_per_child,
     calculate_potential_revenue_per_child,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
@@ -300,6 +301,35 @@ class TestCategorizeFamilyAttendanceRisk:
         )
         assert_frame_equal(
             categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+class TestCalculateMaxRevenuePerChild:
+    def setup_class(self):
+        self.columns=[
+            'adj_full_days_approved',
+            'full_day_rate',
+            'adj_part_days_approved',
+            'part_day_rate',
+            'copay',
+        ]
+
+    def test_calculate_max_revenue_per_child(self):
+        example_df = pd.DataFrame(
+            [
+                [10, 20, 5, 10, 20]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                [10, 20, 5, 10, 20, 230]
+            ],
+            columns=self.columns + ['max_monthly_payment']
+        )
+        assert_frame_equal(
+            calculate_max_revenue_per_child(example_df),
             expected_df
         )
 

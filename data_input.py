@@ -340,6 +340,22 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
     merged_df = merged_df.drop('num_children_in_family', axis=1)
     return merged_df
 
+def calculate_max_revenue_per_child(merged_df):
+    '''
+    Calculates the maximum approved revenue per child.
+
+    Returns a dataframe with an additional max revenue column.
+    '''
+    def calculate_max_revenue(row):
+        return (
+            row['adj_full_days_approved'] * row['full_day_rate']
+            + row['adj_part_days_approved'] * row['part_day_rate']
+            - row['copay']
+        )
+
+    merged_df['max_monthly_payment'] = merged_df.apply(calculate_max_revenue, axis=1)
+    return merged_df
+
 def calculate_min_revenue_per_child(merged_df):
     '''
     Calculates the minimum (guaranteed revenue) per child.
@@ -487,6 +503,7 @@ def get_dashboard_data():
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, month_days, days_left)
+                          .pipe(calculate_max_revenue_per_child)
                           .pipe(calculate_min_revenue_per_child)
                           .pipe(calculate_potential_revenue_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)
