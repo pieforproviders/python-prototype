@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 
 from utilities import (
-    pad_hour
+    pad_hour,
+    remove_non_alpha
 )
 
 # constants
@@ -127,6 +128,13 @@ def clean_attendance_data(attendance_df):
     attendance_df['check_out_date'] = pd.to_datetime(attendance_df['check_out_date'])
 
     return attendance_df
+
+def generate_child_id(df):
+    '''Generates a child id column based on first name and last name'''
+    first_name = df['first_name'].map(remove_non_alpha)
+    last_name = df['last_name'].map(remove_non_alpha)
+    df['child_id'] = first_name + last_name
+    return df
 
 def calculate_month_days(attendance_df):
     ''' Calculate days in month and days left from max attendance date'''
@@ -454,7 +462,10 @@ def get_dashboard_data():
     payment = get_payment_data()
 
     # clean attendance data
-    attendance_clean = attendance.pipe(clean_attendance_data)
+    attendance_clean = (
+        attendance.pipe(clean_attendance_data)
+                  .pipe(generate_child_id)
+    )
 
     # get latest date in attendance data
     latest_date = attendance_clean['check_out_date'].max().strftime('%b %d %Y')
@@ -470,7 +481,8 @@ def get_dashboard_data():
 
     # process data for dashboard
     attendance_processed = count_days_attended(attendance_clean)
-    payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
+    payment_processed = generate_child_id(payment)
+    payment_attendance = pd.merge(payment_processed, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
