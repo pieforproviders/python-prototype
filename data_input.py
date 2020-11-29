@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 import numpy as np
 import pandas as pd
 
+from utilities import (
+    pad_hour
+)
+
 # constants
 BASE_PATH = Path(__file__).parent.resolve()
 DATA_PATH = Path(__file__).parent.joinpath('data').resolve()
@@ -19,7 +23,7 @@ attendance_file = os.environ.get('ATTENDANCE_FILE')
 payment_file = os.environ.get('PAYMENT_FILE')
 
 def get_attendance_data():
-    '''Reads in and processes attendance data'''
+    '''Reads in attendance data and returns a dataframe'''
     attendance = pd.read_csv(
         DATA_PATH.joinpath(user_dir, attendance_file),
         usecols=[
@@ -86,9 +90,47 @@ def get_payment_data():
     payment['name'] = payment['first_name'] + ' ' + payment['last_name']
     return payment
 
+def clean_attendance_data(attendance_df):
+    '''Cleans and prepares attendance data for subsequent calculations'''
+    # trim whitespace
+    attendance_df['first_name'] = attendance_df['first_name'].map(
+        lambda s: s.strip()
+    )
+    attendance_df['last_name'] = attendance_df['last_name'].map(
+        lambda s: s.strip()
+    )
+
+    # generate check in and out timestamps
+    check_in_str = (
+        attendance_df['check_in_time'].map(pad_hour) + ' ' + attendance_df['check_in_date']
+    )
+    check_in_ts = pd.to_datetime(check_in_str, format='%I:%M %p %m/%d/%Y')
+
+    check_out_str = (
+        attendance_df['check_out_time'].map(pad_hour) + ' ' + attendance_df['check_out_date']
+    )
+    check_out_ts = pd.to_datetime(check_out_str, format='%I:%M %p %m/%d/%Y')
+
+    # calculate time in care
+    time_delta = check_out_ts - check_in_ts
+
+    # fill in checked in hours and mins for those not filled in
+    attendance_df['hours_checked_in'] = attendance_df['hours_checked_in'].fillna(
+        time_delta.dt.components['hours']
+    )
+    attendance_df['mins_checked_in'] = attendance_df['mins_checked_in'].fillna(
+        time_delta.dt.components['minutes']
+    )
+
+    # convert dates to datetime
+    attendance_df['check_in_date'] = pd.to_datetime(attendance_df['check_in_date'])
+    attendance_df['check_out_date'] = pd.to_datetime(attendance_df['check_out_date'])
+
+    return attendance_df
+
 def calculate_month_days(attendance_df):
     ''' Calculate days in month and days left from max attendance date'''
-    max_attended_date = attendance_df['date'].max()
+    max_attended_date = attendance_df['check_out_date'].max()
     month_days = max_attended_date.daysinmonth
     days_left = month_days - max_attended_date.day
     return month_days, days_left
@@ -411,20 +453,23 @@ def get_dashboard_data():
     attendance = get_attendance_data()
     payment = get_payment_data()
 
+    # clean attendance data
+    attendance_clean = attendance.pipe(clean_attendance_data)
+
     # get latest date in attendance data
-    latest_date = attendance['date'].max().strftime('%b %d %Y')
+    latest_date = attendance_clean['check_out_date'].max().strftime('%b %d %Y')
 
     # calculate days in month and days left in month
-    month_days, days_left = calculate_month_days(attendance)
+    month_days, days_left = calculate_month_days(attendance_clean)
 
     # check if data is insufficient
-    is_data_insufficient = (month_days - days_left)/month_days < 0.5
+    is_data_insufficient = (month_days - days_left) / month_days < 0.5
 
     # calculate number of days required for at-risk warnings to be shown
     days_req_for_warnings = math.ceil(month_days/2)
 
     # process data for dashboard
-    attendance_processed = count_days_attended(attendance)
+    attendance_processed = count_days_attended(attendance_clean)
     payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
