@@ -36,9 +36,18 @@ def example_attendance_data():
     attendance['date'] = pd.to_datetime(attendance['date'])
     return attendance
 
-def test_calculate_month_days(example_attendance_data):
-    expected = (30, 28) # function returns month days, days left
-    assert calculate_month_days(example_attendance_data) == expected
+class TestCalculateMonthDays:
+    def test_calculate_month_days(self):
+        example_df = pd.DataFrame(
+            [
+                ['2020-09-02'],
+                ['2020-09-01'],
+            ],
+            columns=['check_out_date']
+        )
+        example_df['check_out_date'] = pd.to_datetime(example_df['check_out_date'])
+        expected = (30, 28) # function returns month days, days left
+        assert calculate_month_days(example_df) == expected
 
 def test_count_days_attended(example_attendance_data):
     expected_data = StringIO(
