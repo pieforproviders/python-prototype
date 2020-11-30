@@ -8,6 +8,7 @@ from data_input import(
     calculate_month_days,
     count_days_attended,
     adjust_school_age_days,
+    cap_attended_days,
     calculate_family_days,
     categorize_family_attendance_risk,
     calculate_max_revenue_per_child,
@@ -95,6 +96,50 @@ def test_adjust_school_age_days():
     assert_frame_equal(
         adjust_school_age_days(example_df), expected_df
     )
+
+class TestCapAttendedDays:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'adj_full_days_approved',
+            'full_days_attended',
+            'adj_part_days_approved',
+            'part_days_attended',
+        ]
+
+    def test_cap_attended_days_full_attended_over_approved(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 5, 6, 4, 2]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', 5, 5, 4, 2]
+            ],
+            columns=self.columns
+        )
+
+        assert_frame_equal(cap_attended_days(example_df), expected_df)
+
+    def test_cap_attended_days_part_attended_over_approved(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 5, 3, 4, 6]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', 5, 3, 4, 4]
+            ],
+            columns=self.columns
+        )
+
+        assert_frame_equal(cap_attended_days(example_df), expected_df)
 
 def test_calculate_family_days():
     example_df = pd.DataFrame(

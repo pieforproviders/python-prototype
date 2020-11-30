@@ -231,6 +231,31 @@ def adjust_school_age_days(merged_df):
     merged_df = merged_df.drop('extra_full_days', axis=1)
     return merged_df
 
+def cap_attended_days(merged_df):
+    '''
+    Caps the days attended by a child to the days approved by rate type.
+
+    We assume that the provider will not receive payment for days attended over
+    the days approved for each rate type.
+
+    Returns a dataframe with days attended capped at days approved for each rate
+    type.
+    '''
+    merged_df['full_days_attended'] = merged_df.apply(
+        lambda row: row['adj_full_days_approved']
+        if row['full_days_attended'] > row['adj_full_days_approved']
+        else row['full_days_attended'],
+        axis=1
+    )
+
+    merged_df['part_days_attended'] = merged_df.apply(
+        lambda row: row['adj_part_days_approved']
+        if row['part_days_attended'] > row['adj_part_days_approved']
+        else row['part_days_attended'],
+        axis=1
+    )
+    return merged_df
+
 def calculate_family_days(merged_df):
     '''
     Aggregates child level days on a family level.
@@ -501,6 +526,7 @@ def get_dashboard_data():
     payment_attendance = pd.merge(payment_processed, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
+                          .pipe(cap_attended_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, month_days, days_left)
                           .pipe(calculate_max_revenue_per_child)
