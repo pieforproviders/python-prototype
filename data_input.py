@@ -6,6 +6,11 @@ from dotenv import load_dotenv
 import numpy as np
 import pandas as pd
 
+from utilities import (
+    pad_hour,
+    remove_non_alpha
+)
+
 # constants
 BASE_PATH = Path(__file__).parent.resolve()
 DATA_PATH = Path(__file__).parent.joinpath('data').resolve()
@@ -19,28 +24,34 @@ attendance_file = os.environ.get('ATTENDANCE_FILE')
 payment_file = os.environ.get('PAYMENT_FILE')
 
 def get_attendance_data():
-    '''Reads in and processes attendance data'''
+    '''Reads in attendance data and returns a dataframe'''
     attendance = pd.read_csv(
         DATA_PATH.joinpath(user_dir, attendance_file),
         usecols=[
-            'Child ID',
-            'Date',
-            'School account',
-            'Hours checked in',
-            'Minutes checked in'
+            'First name',
+            'Last name',
+            'Check in time',
+            'Check in date',
+            'Check out time',
+            'Check out date',
+            'Hours in care',
+            'Minutes in care',
         ]
     )
     # rename columns to standardize column names
     attendance.rename(
         columns={
-            'Child ID': 'child_id',
-            'Date': 'date',
-            'School account': 'biz_name',
-            'Hours checked in': 'hours_checked_in',
-            'Minutes checked in': 'mins_checked_in'},
+            'First name': 'first_name',
+            'Last name': 'last_name',
+            'Check in time': 'check_in_time',
+            'Check in date': 'check_in_date',
+            'Check out time': 'check_out_time',
+            'Check out date': 'check_out_date',
+            'Hours in care': 'hours_checked_in',
+            'Minutes in care': 'mins_checked_in',
+        },
         inplace=True
     )
-    attendance['date'] = pd.to_datetime(attendance['date'])
     return attendance
 
 def get_payment_data():
@@ -50,43 +61,84 @@ def get_payment_data():
         skiprows=1,
         usecols=[
             'Business Name',
-            'First name**',
-            'Last name**',
-            'School age**',
-            'Case number**',
-            'Full days approved**',
-            'Part days (or school days) approved**',
-            'Maximum monthly payment',
+            'First name',
+            'Last name',
+            'School age',
+            'Case number',
+            'Full days approved',
+            'Part days (or school days) approved',
             'Total full day rate',
             'Total part day rate',
             'Co-pay per child',
-            'Child ID'
         ]
     )
     # rename columns to standardize column names
     payment.rename(
         columns={
             'Business Name': 'biz_name',
-            'First name**': 'first_name',
-            'Last name**': 'last_name',
-            'School age**': 'school_age',
-            'Case number**': 'case_number',
-            'Full days approved**': 'full_days_approved',
-            'Part days (or school days) approved**': 'part_days_approved',
-            'Maximum monthly payment': 'max_monthly_payment',
+            'First name': 'first_name',
+            'Last name': 'last_name',
+            'School age': 'school_age',
+            'Case number': 'case_number',
+            'Full days approved': 'full_days_approved',
+            'Part days (or school days) approved': 'part_days_approved',
             'Total full day rate': 'full_day_rate',
             'Total part day rate': 'part_day_rate',
             'Co-pay per child': 'copay',
-            'Child ID': 'child_id'
         },
         inplace=True
     )
     payment['name'] = payment['first_name'] + ' ' + payment['last_name']
     return payment
 
+def clean_attendance_data(attendance_df):
+    '''Cleans and prepares attendance data for subsequent calculations'''
+    # trim whitespace
+    attendance_df['first_name'] = attendance_df['first_name'].map(
+        lambda s: s.strip()
+    )
+    attendance_df['last_name'] = attendance_df['last_name'].map(
+        lambda s: s.strip()
+    )
+
+    # generate check in and out timestamps
+    check_in_str = (
+        attendance_df['check_in_time'].map(pad_hour) + ' ' + attendance_df['check_in_date']
+    )
+    check_in_ts = pd.to_datetime(check_in_str, format='%I:%M %p %m/%d/%Y')
+
+    check_out_str = (
+        attendance_df['check_out_time'].map(pad_hour) + ' ' + attendance_df['check_out_date']
+    )
+    check_out_ts = pd.to_datetime(check_out_str, format='%I:%M %p %m/%d/%Y')
+
+    # calculate time in care
+    time_delta = check_out_ts - check_in_ts
+
+    # fill in checked in hours and mins for those not filled in
+    attendance_df['hours_checked_in'] = attendance_df['hours_checked_in'].fillna(
+        time_delta.dt.components['hours']
+    )
+    attendance_df['mins_checked_in'] = attendance_df['mins_checked_in'].fillna(
+        time_delta.dt.components['minutes']
+    )
+
+    # convert dates to datetime
+    attendance_df['check_in_date'] = pd.to_datetime(attendance_df['check_in_date'])
+    attendance_df['check_out_date'] = pd.to_datetime(attendance_df['check_out_date'])
+
+    return attendance_df
+
+def generate_child_id(df):
+    '''Generates a child id column based on first name and last name'''
+    first_name = df['first_name'].map(remove_non_alpha)
+    last_name = df['last_name'].map(remove_non_alpha)
+    df['child_id'] = first_name + last_name
+    return df
+
 def calculate_month_days(attendance_df):
     ''' Calculate days in month and days left from max attendance date'''
-    max_attended_date = attendance_df['date'].max()
+    max_attended_date = attendance_df['check_out_date'].max()
     month_days = max_attended_date.daysinmonth
     days_left = month_days - max_attended_date.day
     return month_days, days_left
@@ -288,6 +340,22 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
     merged_df = merged_df.drop('num_children_in_family', axis=1)
     return merged_df
 
+def calculate_max_revenue_per_child(merged_df):
+    '''
+    Calculates the maximum approved revenue per child.
+
+    Returns a dataframe with an additional max revenue column.
+    '''
+    def calculate_max_revenue(row):
+        return (
+            row['adj_full_days_approved'] * row['full_day_rate']
+            + row['adj_part_days_approved'] * row['part_day_rate']
+            - row['copay']
+        )
+
+    merged_df['max_monthly_payment'] = merged_df.apply(calculate_max_revenue, axis=1)
+    return merged_df
+
 def calculate_min_revenue_per_child(merged_df):
     '''
     Calculates the minimum (guaranteed revenue) per child.
@@ -409,28 +477,33 @@ def get_dashboard_data():
     attendance = get_attendance_data()
     payment = get_payment_data()
 
-    # subset attendance to half month to simulate having onlf half month data
-    attendance_half = attendance.loc[attendance['date'] <= pd.to_datetime('2020-09-29'), :].copy()
+    # clean attendance data
+    attendance_clean = (
+        attendance.pipe(clean_attendance_data)
+                  .pipe(generate_child_id)
+    )
 
     # get latest date in attendance data
-    latest_date = attendance_half['date'].max().strftime('%b %d %Y')
+    latest_date = attendance_clean['check_out_date'].max().strftime('%b %d %Y')
 
     # calculate days in month and days left in month
-    month_days, days_left = calculate_month_days(attendance_half)
+    month_days, days_left = calculate_month_days(attendance_clean)
 
     # check if data is insufficient
-    is_data_insufficient = (month_days - days_left)/month_days < 0.5
+    is_data_insufficient = (month_days - days_left) / month_days < 0.5
 
     # calculate number of days required for at-risk warnings to be shown
     days_req_for_warnings = math.ceil(month_days/2)
 
     # process data for dashboard
-    attendance_processed = count_days_attended(attendance_half)
-    payment_attendance = pd.merge(payment, attendance_processed, on='child_id')
+    attendance_processed = count_days_attended(attendance_clean)
+    payment_processed = generate_child_id(payment)
+    payment_attendance = pd.merge(payment_processed, attendance_processed, on='child_id')
     df_dashboard = (
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, month_days, days_left)
+                          .pipe(calculate_max_revenue_per_child)
                           .pipe(calculate_min_revenue_per_child)
                           .pipe(calculate_potential_revenue_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)

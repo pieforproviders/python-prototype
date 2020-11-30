@@ -10,6 +10,7 @@ from data_input import(
     adjust_school_age_days,
     calculate_family_days,
     categorize_family_attendance_risk,
+    calculate_max_revenue_per_child,
     calculate_potential_revenue_per_child,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
@@ -35,9 +36,18 @@ def example_attendance_data():
     attendance['date'] = pd.to_datetime(attendance['date'])
     return attendance
 
-def test_calculate_month_days(example_attendance_data):
-    expected = (30, 28) # function returns month days, days left
-    assert calculate_month_days(example_attendance_data) == expected
+class TestCalculateMonthDays:
+    def test_calculate_month_days(self):
+        example_df = pd.DataFrame(
+            [
+                ['2020-09-02'],
+                ['2020-09-01'],
+            ],
+            columns=['check_out_date']
+        )
+        example_df['check_out_date'] = pd.to_datetime(example_df['check_out_date'])
+        expected = (30, 28) # function returns month days, days left
+        assert calculate_month_days(example_df) == expected
 
 def test_count_days_attended(example_attendance_data):
     expected_data = StringIO(
@@ -300,6 +310,35 @@ class TestCategorizeFamilyAttendanceRisk:
         )
         assert_frame_equal(
             categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
+class TestCalculateMaxRevenuePerChild:
+    def setup_class(self):
+        self.columns=[
+            'adj_full_days_approved',
+            'full_day_rate',
+            'adj_part_days_approved',
+            'part_day_rate',
+            'copay',
+        ]
+
+    def test_calculate_max_revenue_per_child(self):
+        example_df = pd.DataFrame(
+            [
+                [10, 20, 5, 10, 20]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                [10, 20, 5, 10, 20, 230]
+            ],
+            columns=self.columns + ['max_monthly_payment']
+        )
+        assert_frame_equal(
+            calculate_max_revenue_per_child(example_df),
             expected_df
         )
 
