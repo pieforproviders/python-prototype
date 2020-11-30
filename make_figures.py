@@ -123,7 +123,7 @@ def make_revenue_chart(df):
     # sum up revenues
     min_revenue_sum = df['min_revenue'].sum()
     potential_revenue_sum = df['potential_revenue'].sum()
-    max_approved_revenue_sum = df['max_monthly_payment'].sum()
+    max_approved_revenue_sum = df['max_revenue'].sum()
     potential_e_learning_revenue_sum = df['e_learning_revenue_potential'].sum()
 
     min_potential_delta = potential_revenue_sum - min_revenue_sum
@@ -245,7 +245,7 @@ def make_table(df):
                 'type': 'numeric',
                 'format': FormatTemplate.money(2)
             }, {
-                'id': 'max_monthly_payment',
+                'id': 'max_revenue',
                 'name': 'Max. revenue approved',
                 'type': 'numeric',
                 'format': FormatTemplate.money(2)

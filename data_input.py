@@ -47,8 +47,8 @@ def get_attendance_data():
             'Check in date': 'check_in_date',
             'Check out time': 'check_out_time',
             'Check out date': 'check_out_date',
-            'Hours in care': 'hours_checked_in',
-            'Minutes in care': 'mins_checked_in',
+            'Hours in care': 'hours_in_care',
+            'Minutes in care': 'mins_in_care',
         },
         inplace=True
     )
@@ -116,10 +116,10 @@ def clean_attendance_data(attendance_df):
     time_delta = check_out_ts - check_in_ts
 
     # fill in checked in hours and mins for those not filled in
-    attendance_df['hours_checked_in'] = attendance_df['hours_checked_in'].fillna(
+    attendance_df['hours_in_care'] = attendance_df['hours_in_care'].fillna(
         time_delta.dt.components['hours']
     )
-    attendance_df['mins_checked_in'] = attendance_df['mins_checked_in'].fillna(
+    attendance_df['mins_in_care'] = attendance_df['mins_in_care'].fillna(
         time_delta.dt.components['minutes']
     )
 
@@ -155,7 +155,7 @@ def count_days_attended(attendance_df):
     Returns a dataframe with additional columns of full and part days attended.
     '''
     time_checked_in = (
-        attendance_df['hours_checked_in'] + (attendance_df['mins_checked_in'] / 60)
+        attendance_df['hours_in_care'] + (attendance_df['mins_in_care'] / 60)
     )
     # count number of part and full days attended
     def count_part_days(time_checked_in_):
@@ -378,7 +378,7 @@ def calculate_max_revenue_per_child(merged_df):
             - row['copay']
         )
 
-    merged_df['max_monthly_payment'] = merged_df.apply(calculate_max_revenue, axis=1)
+    merged_df['max_revenue'] = merged_df.apply(calculate_max_revenue, axis=1)
     return merged_df
 
 def calculate_min_revenue_per_child(merged_df):
@@ -491,7 +491,7 @@ def produce_dashboard_df(df):
         'attendance_rate',
         'min_revenue',
         'potential_revenue',
-        'max_monthly_payment',
+        'max_revenue',
         'e_learning_revenue_potential'
     ]
     df_sub = df.loc[:, cols_to_keep].copy()

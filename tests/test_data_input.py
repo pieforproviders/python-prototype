@@ -5,7 +5,7 @@ import pytest
 from io import StringIO
 
 from data_input import(
-    calculate_month_days,
+    calculate_days_in_month,
     count_days_attended,
     adjust_school_age_days,
     cap_attended_days,
@@ -20,7 +20,7 @@ from data_input import(
 @pytest.fixture
 def example_attendance_data():
     attendance_data = StringIO(
-        '''child_id,date,biz_name,hours_checked_in,mins_checked_in,
+        '''child_id,date,biz_name,hours_in_care,mins_in_care,
         JanSchakowsky,2020-09-01,Lil Baby Ducklings,11,44
         KeithEllison,2020-09-01,Lil Baby Ducklings,3,34
         LaurenUnderwood,2020-09-02,Lil Baby Ducklings,10,26
@@ -38,7 +38,7 @@ def example_attendance_data():
     return attendance
 
 class TestCalculateMonthDays:
-    def test_calculate_month_days(self):
+    def test_calculate_days_in_month(self):
         example_df = pd.DataFrame(
             [
                 ['2020-09-02'],
@@ -48,7 +48,7 @@ class TestCalculateMonthDays:
         )
         example_df['check_out_date'] = pd.to_datetime(example_df['check_out_date'])
         expected = (30, 28) # function returns month days, days left
-        assert calculate_month_days(example_df) == expected
+        assert calculate_days_in_month(example_df) == expected
 
 def test_count_days_attended(example_attendance_data):
     expected_data = StringIO(
@@ -380,7 +380,7 @@ class TestCalculateMaxRevenuePerChild:
             [
                 [10, 20, 5, 10, 20, 230]
             ],
-            columns=self.columns + ['max_monthly_payment']
+            columns=self.columns + ['max_revenue']
         )
         assert_frame_equal(
             calculate_max_revenue_per_child(example_df),

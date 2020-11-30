@@ -24,7 +24,7 @@ ga_tracking_id = os.environ.get('GA_TRACKING_ID')
 df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings = get_dashboard_data()
 min_revenue_sum = df_dashboard['min_revenue'].sum()
 potential_revenue_sum = df_dashboard['potential_revenue'].sum()
-max_approved_revenue_sum = df_dashboard['max_monthly_payment'].sum()
+max_approved_revenue_sum = df_dashboard['max_revenue'].sum()
 
 # figures
 child_table = make_table(df_dashboard)
