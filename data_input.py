@@ -154,32 +154,32 @@ def count_days_attended(attendance_df):
 
     Returns a dataframe with additional columns of full and part days attended.
     '''
-    time_checked_in = (
+    time_in_care = (
         attendance_df['hours_in_care'] + (attendance_df['mins_in_care'] / 60)
     )
     # count number of part and full days attended
-    def count_part_days(time_checked_in_):
+    def count_part_days(time_in_care_):
         if (
-            time_checked_in_ < 5
-            or  12 < time_checked_in_ < 17
+            time_in_care_ < 5
+            or  12 < time_in_care_ < 17
         ):
             return 1
         else:
             return 0
 
-    def count_full_days(time_checked_in_):
-        if time_checked_in_ < 5:
+    def count_full_days(time_in_care_):
+        if time_in_care_ < 5:
             return 0
-        if time_checked_in_ < 17:
+        if time_in_care_ < 17:
             return 1
-        if time_checked_in_ <= 24:
+        if time_in_care_ <= 24:
             return 2
         else:
             # TODO add separate data validation functions
             raise ValueError('Value should not be more than 24')
 
-    attendance_df['part_days_attended'] = time_checked_in.map(count_part_days)
-    attendance_df['full_days_attended'] = time_checked_in.map(count_full_days)
+    attendance_df['part_days_attended'] = time_in_care.map(count_part_days)
+    attendance_df['full_days_attended'] = time_in_care.map(count_full_days)
 
     # aggregate to each child_id
     return (
