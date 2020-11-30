@@ -136,12 +136,12 @@ def generate_child_id(df):
     df['child_id'] = first_name + last_name
     return df
 
-def calculate_month_days(attendance_df):
+def calculate_days_in_month(attendance_df):
     ''' Calculate days in month and days left from max attendance date'''
     max_attended_date = attendance_df['check_out_date'].max()
-    month_days = max_attended_date.daysinmonth
-    days_left = month_days - max_attended_date.day
-    return month_days, days_left
+    days_in_month = max_attended_date.daysinmonth
+    days_left = days_in_month - max_attended_date.day
+    return days_in_month, days_left
 
 def count_days_attended(attendance_df):
     '''
@@ -293,13 +293,13 @@ def calculate_family_days(merged_df):
 
     return merged_df
 
-def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
+def categorize_family_attendance_risk(merged_df, days_in_month_, days_left_):
     '''
     Categorizes the attendance risk of a family
 
     Returns a dataframe with an additional attendance risk column
     '''
-    days_elapsed = month_days_ - days_left_
+    days_elapsed = days_in_month_ - days_left_
 
     # calculate number of children in the family
     merged_df['num_children_in_family'] = (
@@ -310,7 +310,7 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
     def categorize_families(row):
         # helper function to categorize families
         # not enough information
-        if days_elapsed / month_days_ < 0.5:
+        if days_elapsed / days_in_month_ < 0.5:
             return 'Not enough info'
         # sure bet
         if (
@@ -352,7 +352,7 @@ def categorize_family_attendance_risk(merged_df, month_days_, days_left_):
         # at risk (using percentage rule based on adjusted attendance rate)
         if (
             row['family_total_days_attended']
-            / ((days_elapsed / month_days_) * row['family_total_days_approved'])
+            / ((days_elapsed / days_in_month_) * row['family_total_days_approved'])
             < ATTENDANCE_THRESHOLD
         ):
             return 'At risk'
@@ -512,13 +512,13 @@ def get_dashboard_data():
     latest_date = attendance_clean['check_out_date'].max().strftime('%b %d %Y')
 
     # calculate days in month and days left in month
-    month_days, days_left = calculate_month_days(attendance_clean)
+    days_in_month, days_left = calculate_days_in_month(attendance_clean)
 
     # check if data is insufficient
-    is_data_insufficient = (month_days - days_left) / month_days < 0.5
+    is_data_insufficient = (days_in_month - days_left) / days_in_month < 0.5
 
     # calculate number of days required for at-risk warnings to be shown
-    days_req_for_warnings = math.ceil(month_days/2)
+    days_req_for_warnings = math.ceil(days_in_month/2)
 
     # process data for dashboard
     attendance_processed = count_days_attended(attendance_clean)
@@ -528,7 +528,7 @@ def get_dashboard_data():
         payment_attendance.pipe(adjust_school_age_days)
                           .pipe(cap_attended_days)
                           .pipe(calculate_family_days)
-                          .pipe(categorize_family_attendance_risk, month_days, days_left)
+                          .pipe(categorize_family_attendance_risk, days_in_month, days_left)
                           .pipe(calculate_max_revenue_per_child)
                           .pipe(calculate_min_revenue_per_child)
                           .pipe(calculate_potential_revenue_per_child, days_left)
