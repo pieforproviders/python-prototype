@@ -189,6 +189,14 @@ def count_days_attended(attendance_df):
                      .sum()
     )
 
+def extract_ineligible_children(merged_df):
+    '''Keeps the ineligible children'''
+    return merged_df.loc[merged_df['eligibility'] == 'Ineligible', :].copy()
+
+def drop_ineligible_children(merged_df):
+    '''Drops ineligible children'''
+    return merged_df.loc[merged_df['eligibility'] == 'Eligible', :].copy()
+
 def adjust_school_age_days(merged_df):
     '''
     Adjust approved days for school-aged children based on attendance.
