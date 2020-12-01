@@ -507,6 +507,25 @@ def produce_dashboard_df(df):
     df_sub = df.loc[:, cols_to_keep].copy()
     return df_sub
 
+def produce_ineligible_df(ineligible_df):
+    '''Processes ineligible children observations for dashboard'''
+    cols_to_keep = [
+        'name',
+        'case_number',
+        'biz_name',
+    ]
+    ineligible_df = ineligible_df.loc[:, cols_to_keep].copy()
+
+    # add columns where no value was calculated
+    ineligible_df['attendance_category'] = 'Expired'
+    ineligible_df['attendance_rate'] = np.nan
+    ineligible_df['min_revenue'] = 0
+    ineligible_df['potential_revenue'] = 0
+    ineligible_df['max_revenue'] = 0
+    ineligible_df['e_learning_revenue_potential'] = 0
+
+    return ineligible_df
+
 def get_dashboard_data():
     ''' Returns data for dashboard'''
     attendance = get_attendance_data()
