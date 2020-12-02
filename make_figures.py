@@ -233,7 +233,9 @@ def make_table(df):
                 'id': 'attendance_rate',
                 'name': 'Attendance rate',
                 'type': 'numeric',
-                'format': FormatTemplate.percentage(0)
+                'format': {'nully':'-%',
+                        'prefix': None,
+                        'specifier': '.0%'}
             }, {
                 'id': 'min_revenue',
                 'name': 'Guaranteed revenue',
