@@ -358,6 +358,30 @@ class TestCategorizeFamilyAttendanceRisk:
             expected_df
         )
 
+    def test_family_two_children_sure_bet_on_track(self):
+        month_days = 30
+        days_left = 10
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 10, 10, 10, 10, 20],
+                ['b', '01', 10, 10, 0, 10, 10, 20],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 10, 10, 10, 10, 20, 'Sure bet'],
+                ['b', '01', 10, 10, 0, 10, 10, 20, 'On track'],
+            ],
+            columns=self.columns + ['attendance_category']
+        )
+
+        assert_frame_equal(
+            categorize_family_attendance_risk(example_df, month_days, days_left),
+            expected_df
+        )
+
 class TestCalculateMaxRevenuePerChild:
     def setup_class(self):
         self.columns=[
