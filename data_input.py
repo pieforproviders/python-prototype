@@ -491,7 +491,7 @@ def calculate_attendance_rate(df):
     )
     return df
 
-def produce_dashboard_df(df):
+def filter_dashboard_cols(df):
     ''' Filter to required columns for dashboard'''
     cols_to_keep = [
         'name',
@@ -517,7 +517,7 @@ def produce_ineligible_df(ineligible_df):
     ineligible_df = ineligible_df.loc[:, cols_to_keep].copy()
 
     # add columns where no value was calculated
-    ineligible_df['attendance_category'] = 'Expired'
+    ineligible_df['attendance_category'] = 'Case expired'
     ineligible_df['attendance_rate'] = np.nan
     ineligible_df['min_revenue'] = 0
     ineligible_df['potential_revenue'] = 0
@@ -553,8 +553,13 @@ def get_dashboard_data():
     attendance_processed = count_days_attended(attendance_clean)
     payment_processed = generate_child_id(payment)
     payment_attendance = pd.merge(payment_processed, attendance_processed, on='child_id')
+    ineligible = (
+        payment_attendance.pipe(extract_ineligible_children)
+                          .pipe(produce_ineligible_df)
+    )
     df_dashboard = (
-        payment_attendance.pipe(adjust_school_age_days)
+        payment_attendance.pipe(drop_ineligible_children)
+                          .pipe(adjust_school_age_days)
                           .pipe(cap_attended_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, days_in_month, days_left)
@@ -563,7 +568,9 @@ def get_dashboard_data():
                           .pipe(calculate_potential_revenue_per_child, days_left)
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
-                          .pipe(produce_dashboard_df)
+                          .pipe(filter_dashboard_cols)
+                          .append(ineligible, ignore_index=True)
+                          .sort_values(by=['case_number', 'name'])
     )
     return df_dashboard, latest_date, is_data_insufficient, days_req_for_warnings
 
