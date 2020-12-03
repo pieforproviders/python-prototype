@@ -7,6 +7,8 @@ from io import StringIO
 from data_input import(
     calculate_days_in_month,
     count_days_attended,
+    extract_ineligible_children,
+    drop_ineligible_children,
     adjust_school_age_days,
     cap_attended_days,
     calculate_family_days,
@@ -69,6 +71,46 @@ def test_count_days_attended(example_attendance_data):
         count_days_attended(example_attendance_data), expected,
         check_like=True
     )
+
+def test_extract_ineligible_children():
+    example_df = pd.DataFrame(
+        [
+            ['a', 'Eligible'],
+            ['b', 'Ineligible'],
+        ],
+        columns = ['child_id', 'eligibility'],
+    )
+    example_df.set_index('child_id', inplace=True)
+
+    expected_df = pd.DataFrame(
+        [
+            ['b', 'Ineligible']
+        ],
+        columns = ['child_id', 'eligibility']
+    )
+    expected_df.set_index('child_id', inplace=True)
+
+    assert_frame_equal(extract_ineligible_children(example_df), expected_df)
+
+def test_drop_ineligible_children():
+    example_df = pd.DataFrame(
+        [
+            ['a', 'Eligible'],
+            ['b', 'Ineligible'],
+        ],
+        columns = ['child_id', 'eligibility'],
+    )
+    example_df.set_index('child_id', inplace=True)
+
+    expected_df = pd.DataFrame(
+        [
+            ['a', 'Eligible']
+        ],
+        columns = ['child_id', 'eligibility']
+    )
+    expected_df.set_index('child_id', inplace=True)
+
+    assert_frame_equal(drop_ineligible_children(example_df), expected_df)
 
 def test_adjust_school_age_days():
     example_df = pd.DataFrame(

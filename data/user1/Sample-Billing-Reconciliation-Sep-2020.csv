@@ -1,6 +1,6 @@
 From Business Info Upload >>,,,From Provider Data Upload >>,,,,,,,,,,Billing rate calculations >>,,,,,,,,,
-Business Name,Business County,Business QRIS rating,First name,Last name,Date of birth,School age,Case number,Full days approved,Part days (or school days) approved,Effective on,Expires on,Co-pay (monthly),Billing month,Is eligible,Age (Months),Full day rate ,Full day rate quality add-on,Total full day rate,Part day rate,Part day rate quality add-on,Total part day rate,Co-pay per child
-Lil Baby Ducklings,Cook,Gold,Shirley,Chisholm,03/09/2019,No,10000-00000-00001,10,5,05/05/2020,05/05/2021,29.00,09/2020,TRUE,Under 2,39.99,5.9985,45.9885,20,3,23,29
-Lil Baby Ducklings,Cook,Gold,Dolores,Huerta,06/14/2012,Yes,10000-00000-00002,0,10,05/05/2020,05/05/2021,29.00,09/2020,TRUE,3+,33.9,5.085,38.985,16.95,2.5425,19.4925,29
-Lil Baby Ducklings,Cook,Gold,Sojourner,Truth,07/15/2018,No,10000-00000-00003,15,10,05/05/2020,05/05/2021,29.00,09/2020,TRUE,2,37.26,5.589,42.849,18.63,2.7945,21.4245,29
-Lil Baby Ducklings,Cook,Gold,Ralph,Abernathy,08/15/2017,No,10000-00000-00004,20,10,05/05/2020,05/05/2021,29.00,09/2020,TRUE,3+,33.9,5.085,38.985,16.95,2.5425,19.4925,29
+Business Name,Business County,Business QRIS rating,First name,Last name,Date of birth,School age,Case number,Full days approved,Part days (or school days) approved,Effective on,Expires on,Co-pay (monthly),Billing month,Eligibility,Age (Months),Full day rate ,Full day rate quality add-on,Total full day rate,Part day rate,Part day rate quality add-on,Total part day rate,Co-pay per child
+Lil Baby Ducklings,Cook,Gold,Shirley,Chisholm,03/09/2019,No,10000-00000-00001,10,5,05/05/2020,05/05/2021,29.00,09/2020,Eligible,Under 2,39.99,5.9985,45.9885,20,3,23,29
+Lil Baby Ducklings,Cook,Gold,Dolores,Huerta,06/14/2012,Yes,10000-00000-00002,0,10,05/05/2020,05/05/2021,29.00,09/2020,Eligible,3+,33.9,5.085,38.985,16.95,2.5425,19.4925,29
+Lil Baby Ducklings,Cook,Gold,Sojourner,Truth,07/15/2018,No,10000-00000-00003,15,10,05/05/2020,05/05/2021,29.00,09/2020,Eligible,2,37.26,5.589,42.849,18.63,2.7945,21.4245,29
+Lil Baby Ducklings,Cook,Gold,Ralph,Abernathy,08/15/2017,No,10000-00000-00004,20,10,05/05/2020,05/05/2021,29.00,09/2020,Eligible,3+,33.9,5.085,38.985,16.95,2.5425,19.4925,29

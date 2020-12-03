@@ -20,7 +20,7 @@ def make_attendance_table(df):
         at_risk_count = df[df['attendance_category'] == 'At risk'].shape[0]
         not_met_count = df[df['attendance_category'] == 'Not met'].shape[0]
         on_track_count = df[df['attendance_category'] == 'On track'].shape[0]
-        total_count = df['attendance_category'].shape[0]
+        total_count = df.loc[df['attendance_category'] != 'Case expired'].shape[0]
 
         # calculate percentage of children in each category
         sure_bet_pct = sure_bet_count / total_count
@@ -233,7 +233,9 @@ def make_table(df):
                 'id': 'attendance_rate',
                 'name': 'Attendance rate',
                 'type': 'numeric',
-                'format': FormatTemplate.percentage(0)
+                'format': {'nully':'-%',
+                        'prefix': None,
+                        'specifier': '.0%'}
             }, {
                 'id': 'min_revenue',
                 'name': 'Guaranteed revenue',
