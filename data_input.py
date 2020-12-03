@@ -36,7 +36,17 @@ def get_attendance_data():
             'Check out date',
             'Hours in care',
             'Minutes in care',
-        ]
+        ],
+        dtype={
+            'First name': str,
+            'Last name': str,
+            'Check in time': str,
+            'Check in date': str,
+            'Check out time': str,
+            'Check out date': str,
+            'Hours in care': np.float_,
+            'Minutes in care': np.float_,
+        }
     )
     # rename columns to standardize column names
     attendance.rename(
@@ -71,7 +81,20 @@ def get_payment_data():
             'Total full day rate',
             'Total part day rate',
             'Co-pay per child',
-        ]
+        ],
+        dtype={
+            'Business Name': str,
+            'First name': str,
+            'Last name': str,
+            'School age': str,
+            'Case number': str,
+            'Full days approved': np.float_,
+            'Part days (or school days) approved': np.float_,
+            'Eligibility': str,
+            'Total full day rate': np.float_,
+            'Total part day rate': np.float_,
+            'Co-pay per child': np.float_,
+        }
     )
     # rename columns to standardize column names
     payment.rename(
