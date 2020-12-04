@@ -5,6 +5,7 @@ import pytest
 from io import StringIO
 
 from data_input import(
+    get_payment_data,
     calculate_days_in_month,
     count_days_attended,
     extract_ineligible_children,
@@ -38,6 +39,41 @@ def example_attendance_data():
     attendance = pd.read_csv(attendance_data)
     attendance['date'] = pd.to_datetime(attendance['date'])
     return attendance
+
+@pytest.fixture
+def example_payment_data():
+    payment_data = StringIO(
+        "first_header_col,,,,,,,,,,last_header_col\n"
+        "Business Name,First name,Last name,School age,Case number,Full days approved,Part days (or school days) approved,Eligibility,Total full day rate,Total part day rate,Co-pay per child\n"
+        "Lil Baby Ducklings,Jan,Schakowsky,No,100-001,10,,Eligible,20,10,15\n"
+        "Lil Baby Ducklings,Keith,Ellison,Yes,100-002,,5,Eligible,20,10,15\n"
+        "Lil Baby Ducklings,Lauren,Underwood,Yes,100-003,10,5,Eligible,20,10,15\n"
+    )
+    return payment_data
+
+def test_get_payment_data(example_payment_data):
+    expected_df = pd.DataFrame(
+        [
+            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 'Eligible', 20., 10., 15., 'Jan Schakowsky'],
+            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 'Eligible', 20., 10., 15., 'Keith Ellison'],
+            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 'Eligible', 20., 10., 15., 'Lauren Underwood'],
+        ],
+        columns=[
+            'biz_name',
+            'first_name',
+            'last_name',
+            'school_age',
+            'case_number',
+            'full_days_approved',
+            'part_days_approved',
+            'eligibility',
+            'full_day_rate',
+            'part_day_rate',
+            'copay',
+            'name',
+        ]
+    )
+    assert_frame_equal(get_payment_data(example_payment_data), expected_df)
 
 class TestCalculateMonthDays:
     def test_calculate_days_in_month(self):
