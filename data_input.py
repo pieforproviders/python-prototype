@@ -426,11 +426,17 @@ def calculate_min_revenue_per_child(merged_df):
     Returns a dataframe with an additional min revenue column.
     '''
     def calculate_min_revenue(row):
-        # min revenue is attended days * rate, unless sure bet
-        # full day
-        if row['attendance_category'] == 'Sure bet':
-            full_day_min_revenue = row['adj_full_days_approved'] * row['full_day_rate']
-            part_day_min_revenue = row['adj_part_days_approved'] * row['part_day_rate']
+        # if threshold met and > 0 instances of attendance then approved days * rate type
+        if (row['family_total_days_attended'] / row['family_total_days_approved']
+            >= ATTENDANCE_THRESHOLD):
+            if row['full_days_attended'] > 0:
+                full_day_min_revenue = row['adj_full_days_approved'] * row['full_day_rate']
+            else:
+                full_day_min_revenue = 0
+            if row['part_days_attended'] > 0:
+                part_day_min_revenue = row['adj_part_days_approved'] * row['part_day_rate']
+            else:
+                part_day_min_revenue = 0
         else:
             full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
             part_day_min_revenue = row['part_days_attended'] * row['part_day_rate']
