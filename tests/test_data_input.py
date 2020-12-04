@@ -55,9 +55,9 @@ def example_payment_data():
 def test_get_payment_data(example_payment_data):
     expected_df = pd.DataFrame(
         [
-            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 'Eligible', 20., 10., 15., 'Jan Schakowsky'],
-            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 'Eligible', 20., 10., 15., 'Keith Ellison'],
-            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 'Eligible', 20., 10., 15., 'Lauren Underwood'],
+            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 'Eligible', 20., 10., 15.],
+            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 'Eligible', 20., 10., 15.],
+            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 'Eligible', 20., 10., 15.],
         ],
         columns=[
             'biz_name',
@@ -71,7 +71,6 @@ def test_get_payment_data(example_payment_data):
             'full_day_rate',
             'part_day_rate',
             'copay',
-            'name',
         ]
     )
     assert_frame_equal(get_payment_data(example_payment_data), expected_df)
