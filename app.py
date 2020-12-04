@@ -163,7 +163,7 @@ revenue_copy_card = dbc.Card(
                     html.P(
                         [
                             html.Strong('Potential revenue: '),
-                            html.Span('based on attendance expected for rest of the month')
+                            html.Span('maximum possible, based on attendance to date')
                         ]
                     ),
                     html.P(
