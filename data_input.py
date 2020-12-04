@@ -65,7 +65,7 @@ def get_attendance_data(filepath):
     return attendance
 
 def get_payment_data(filepath):
-    ''' Reads in and processes payment data'''
+    ''' Reads in payment data and returns a dataframe'''
     payment = pd.read_csv(
         filepath,
         skiprows=1,
@@ -113,12 +113,9 @@ def get_payment_data(filepath):
         },
         inplace=True
     )
-    payment['name'] = payment['first_name'] + ' ' + payment['last_name']
-
     # fill in nans for approved days as zeros
     payment['full_days_approved'] =  payment['full_days_approved'].fillna(0)
     payment['part_days_approved'] =  payment['part_days_approved'].fillna(0)
-
     return payment
 
 def clean_attendance_data(attendance_df):
@@ -158,6 +155,25 @@ def clean_attendance_data(attendance_df):
     attendance_df['check_out_date'] = pd.to_datetime(attendance_df['check_out_date'])
 
     return attendance_df
+
+def clean_payment_data(payment_df):
+    '''Cleans and prepares payment data for subsequent calculations'''
+    # trim whitespace for user input text columns
+    payment_df['biz_name'] = payment_df['biz_name'].map(
+        lambda s: s.strip()
+    )
+    payment_df['first_name'] = payment_df['first_name'].map(
+        lambda s: s.strip()
+    )
+    payment_df['last_name'] = payment_df['last_name'].map(
+        lambda s: s.strip()
+    )
+    payment_df['case_number'] = payment_df['case_number'].map(
+        lambda s: s.strip()
+    )
+    # generate full name column
+    payment_df['name'] = payment_df['first_name'] + ' ' + payment_df['last_name']
+    return payment_df
 
 def generate_child_id(df):
     '''Generates a child id column based on first name and last name'''
@@ -585,7 +601,10 @@ def get_dashboard_data():
 
     # process data for dashboard
     attendance_processed = count_days_attended(attendance_clean)
-    payment_processed = generate_child_id(payment)
+    payment_processed = (
+        payment.pipe(clean_payment_data)
+               .pipe(generate_child_id)
+    )
     payment_attendance = pd.merge(payment_processed, attendance_processed, on='child_id')
     ineligible = (
         payment_attendance.pipe(extract_ineligible_children)
