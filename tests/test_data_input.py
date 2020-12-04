@@ -14,6 +14,7 @@ from data_input import(
     cap_attended_days,
     calculate_family_days,
     categorize_family_attendance_risk,
+    calculate_min_revenue_per_child,
     calculate_max_revenue_per_child,
     calculate_potential_revenue_per_child,
     calculate_e_learning_revenue,
@@ -459,6 +460,81 @@ class TestCategorizeFamilyAttendanceRisk:
             categorize_family_attendance_risk(example_df, month_days, days_left),
             expected_df
         )
+
+class TestCalculateMinRevenuePerChild:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'family_total_days_attended',
+            'family_total_days_approved',
+            'adj_full_days_approved',
+            'adj_part_days_approved',
+            'full_days_attended',
+            'part_days_attended',
+            'full_day_rate',
+            'part_day_rate',
+            'copay',
+        ]
+
+    def test_sure_bet(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 10, 5, 9, 4, 20, 10, 15]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 10, 5, 9, 4, 20, 10, 15, 235]
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+
+    def test_threshold_met_full_approved_no_full_attendance(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 14, 1, 13, 0, 20, 10, 15]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 14, 1, 13, 0, 20, 10, 15, 265]
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+
+    def test_threshold_met_part_approved_no_part_attendance(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 1, 14, 0, 13, 20, 10, 15]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 1, 14, 0, 13, 20, 10, 15, 125]
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+
+    def test_threshold_not_met(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 3, 10, 5, 5, 2, 1, 20, 10, 15]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 3, 10, 5, 5, 2, 1, 20, 10, 15, 35]
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
 
 class TestCalculateMaxRevenuePerChild:
     def setup_class(self):
