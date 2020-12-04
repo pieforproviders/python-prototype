@@ -64,10 +64,10 @@ def get_attendance_data():
     )
     return attendance
 
-def get_payment_data():
+def get_payment_data(filepath):
     ''' Reads in and processes payment data'''
     payment = pd.read_csv(
-        DATA_PATH.joinpath(user_dir, payment_file),
+        filepath,
         skiprows=1,
         usecols=[
             'Business Name',
@@ -114,6 +114,11 @@ def get_payment_data():
         inplace=True
     )
     payment['name'] = payment['first_name'] + ' ' + payment['last_name']
+
+    # fill in nans for approved days as zeros
+    payment['full_days_approved'] =  payment['full_days_approved'].fillna(0)
+    payment['part_days_approved'] =  payment['part_days_approved'].fillna(0)
+
     return payment
 
 def clean_attendance_data(attendance_df):
@@ -552,7 +557,7 @@ def produce_ineligible_df(ineligible_df):
 def get_dashboard_data():
     ''' Returns data for dashboard'''
     attendance = get_attendance_data()
-    payment = get_payment_data()
+    payment = get_payment_data(DATA_PATH.joinpath(user_dir, payment_file))
 
     # clean attendance data
     attendance_clean = (
