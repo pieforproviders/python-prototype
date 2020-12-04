@@ -23,10 +23,10 @@ user_dir = os.environ.get('USER_DIR')
 attendance_file = os.environ.get('ATTENDANCE_FILE')
 payment_file = os.environ.get('PAYMENT_FILE')
 
-def get_attendance_data():
+def get_attendance_data(filepath):
     '''Reads in attendance data and returns a dataframe'''
     attendance = pd.read_csv(
-        DATA_PATH.joinpath(user_dir, attendance_file),
+        filepath,
         usecols=[
             'First name',
             'Last name',
@@ -556,7 +556,7 @@ def produce_ineligible_df(ineligible_df):
 
 def get_dashboard_data():
     ''' Returns data for dashboard'''
-    attendance = get_attendance_data()
+    attendance = get_attendance_data(DATA_PATH.joinpath(user_dir, attendance_file))
     payment = get_payment_data(DATA_PATH.joinpath(user_dir, payment_file))
 
     # clean attendance data
