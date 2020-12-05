@@ -118,7 +118,7 @@ def get_payment_data(filepath):
             'Part day rate quality add-on': 'part_day_quality_add_on',
             'Total full day rate': 'full_day_rate',
             'Total part day rate': 'part_day_rate',
-            'Co-pay per child': 'copay',
+            'Co-pay per child': 'copay_per_child',
         },
         inplace=True
     )
@@ -453,7 +453,7 @@ def calculate_max_revenue_per_child(merged_df):
         return (
             row['adj_full_days_approved'] * row['full_day_rate']
             + row['adj_part_days_approved'] * row['part_day_rate']
-            - row['copay']
+            - row['copay_per_child']
         )
 
     merged_df['max_revenue'] = merged_df.apply(calculate_max_revenue, axis=1)
@@ -480,7 +480,7 @@ def calculate_min_revenue_per_child(merged_df):
         else:
             full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
             part_day_min_revenue = row['part_days_attended'] * row['part_day_rate']
-        return full_day_min_revenue + part_day_min_revenue - row['copay']
+        return full_day_min_revenue + part_day_min_revenue - row['copay_per_child']
 
     merged_df['min_revenue'] = merged_df.apply(calculate_min_revenue, axis=1)
     return merged_df
@@ -525,7 +525,7 @@ def calculate_potential_revenue_per_child(merged_df, days_left_):
             part_day_potential_revenue = (
                 row['adj_part_days_approved'] * row['part_day_rate']
             )
-        return full_day_potential_revenue + part_day_potential_revenue - row['copay']
+        return full_day_potential_revenue + part_day_potential_revenue - row['copay_per_child']
 
     merged_df['potential_revenue'] = merged_df.apply(
         calculate_potential_revenue,

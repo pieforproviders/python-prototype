@@ -73,7 +73,7 @@ def test_get_payment_data(example_payment_data):
             'part_day_quality_add_on',
             'full_day_rate',
             'part_day_rate',
-            'copay',
+            'copay_per_child',
         ]
     )
     assert_frame_equal(get_payment_data(example_payment_data), expected_df)
@@ -475,7 +475,7 @@ class TestCalculateMinRevenuePerChild:
             'part_days_attended',
             'full_day_rate',
             'part_day_rate',
-            'copay',
+            'copay_per_child',
         ]
 
     def test_sure_bet(self):
@@ -545,7 +545,7 @@ class TestCalculateMaxRevenuePerChild:
             'full_day_rate',
             'adj_part_days_approved',
             'part_day_rate',
-            'copay',
+            'copay_per_child',
         ]
 
     def test_calculate_max_revenue_per_child(self):
@@ -579,7 +579,7 @@ class TestCalculatePotentialRevenuePerChild:
             'attendance_category',
             'full_day_rate',
             'part_day_rate',
-            'copay',
+            'copay_per_child',
         ]
 
     def test_other_category(self):
