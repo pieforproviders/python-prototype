@@ -233,6 +233,21 @@ def count_days_attended(attendance_df):
                      .sum()
     )
 
+def combine_payment_and_attendance(payment_df, attendance_df):
+    ''' Combines payment and attendance data and returns a merged dataframe.'''
+    # left join between payment and attendance data
+    merged_df = pd.merge(
+        payment_df, attendance_df,
+        how='left',
+        on='child_id'
+    )
+
+    # kids without attendance data have no attendance so set attended days as 0
+    merged_df['full_days_attended'] = merged_df['full_days_attended'].fillna(0)
+    merged_df['part_days_attended'] = merged_df['part_days_attended'].fillna(0)
+
+    return merged_df
+
 def extract_ineligible_children(merged_df):
     '''Keeps the ineligible children'''
     return merged_df.loc[merged_df['eligibility'] == 'Ineligible', :].copy()
@@ -605,7 +620,12 @@ def get_dashboard_data():
         payment.pipe(clean_payment_data)
                .pipe(generate_child_id)
     )
-    payment_attendance = pd.merge(payment_processed, attendance_processed, on='child_id')
+
+    # combine payment and attendance data
+    payment_attendance = combine_payment_and_attendance(
+        payment_processed, attendance_processed
+    )
+
     ineligible = (
         payment_attendance.pipe(extract_ineligible_children)
                           .pipe(produce_ineligible_df)
