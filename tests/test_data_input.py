@@ -15,7 +15,7 @@ from data_input import(
     calculate_family_days,
     categorize_family_attendance_risk,
     calculate_min_revenue_per_child_before_copay,
-    calculate_max_revenue_per_child,
+    calculate_max_revenue_per_child_before_copay,
     calculate_potential_revenue_per_child_before_copay,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
@@ -545,32 +545,31 @@ class TestCalculateMinRevenuePerChildBeforeCopay:
             calculate_min_revenue_per_child_before_copay(example_df), expected_df
         )
 
-class TestCalculateMaxRevenuePerChild:
+class TestCalculateMaxRevenuePerChildBeforeCopay:
     def setup_class(self):
         self.columns=[
             'adj_full_days_approved',
             'full_day_rate',
             'adj_part_days_approved',
             'part_day_rate',
-            'copay_per_child',
         ]
 
     def test_calculate_max_revenue_per_child(self):
         example_df = pd.DataFrame(
             [
-                [10, 20, 5, 10, 20]
+                [10, 20, 5, 10]
             ],
             columns=self.columns
         )
 
         expected_df = pd.DataFrame(
             [
-                [10, 20, 5, 10, 20, 230]
+                [10, 20, 5, 10, 250]
             ],
-            columns=self.columns + ['max_revenue']
+            columns=self.columns + ['max_revenue_before_copay']
         )
         assert_frame_equal(
-            calculate_max_revenue_per_child(example_df),
+            calculate_max_revenue_per_child_before_copay(example_df),
             expected_df
         )
 
