@@ -77,9 +77,12 @@ def get_payment_data(filepath):
             'Case number',
             'Full days approved',
             'Part days (or school days) approved',
+            'Co-pay (monthly)',
             'Eligibility',
-            'Total full day rate',
-            'Total part day rate',
+            'Full day rate',
+            'Full day rate quality add-on',
+            'Part day rate',
+            'Part day rate quality add-on',
             'Co-pay per child',
         ],
         dtype={
@@ -90,9 +93,12 @@ def get_payment_data(filepath):
             'Case number': str,
             'Full days approved': np.float_,
             'Part days (or school days) approved': np.float_,
+            'Co-pay (monthly)': np.float_,
             'Eligibility': str,
-            'Total full day rate': np.float_,
-            'Total part day rate': np.float_,
+            'Full day rate': np.float_,
+            'Full day rate quality add-on': np.float_,
+            'Part day rate': np.float_,
+            'Part day rate quality add-on': np.float_,
             'Co-pay per child': np.float_,
         }
     )
@@ -106,10 +112,13 @@ def get_payment_data(filepath):
             'Case number': 'case_number',
             'Full days approved': 'full_days_approved',
             'Part days (or school days) approved': 'part_days_approved',
+            'Co-pay (monthly)': 'family_copay',
             'Eligibility': 'eligibility',
-            'Total full day rate': 'full_day_rate',
-            'Total part day rate': 'part_day_rate',
-            'Co-pay per child': 'copay',
+            'Full day rate': 'full_day_rate',
+            'Full day rate quality add-on': 'full_day_quality_add_on',
+            'Part day rate': 'part_day_rate',
+            'Part day rate quality add-on': 'part_day_quality_add_on',
+            'Co-pay per child': 'copay_per_child',
         },
         inplace=True
     )
@@ -434,27 +443,42 @@ def categorize_family_attendance_risk(merged_df, days_in_month_, days_left_):
     merged_df = merged_df.drop('num_children_in_family', axis=1)
     return merged_df
 
-def calculate_max_revenue_per_child(merged_df):
+def calculate_max_revenue_per_child_before_copay(merged_df):
     '''
-    Calculates the maximum approved revenue per child.
+    Calculates the maximum approved revenue per child before copay.
 
-    Returns a dataframe with an additional max revenue column.
+    Returns a dataframe with an additional max revenue before copay column.
     '''
     def calculate_max_revenue(row):
         return (
             row['adj_full_days_approved'] * row['full_day_rate']
             + row['adj_part_days_approved'] * row['part_day_rate']
-            - row['copay']
         )
 
-    merged_df['max_revenue'] = merged_df.apply(calculate_max_revenue, axis=1)
+    merged_df['max_revenue_before_copay'] = merged_df.apply(calculate_max_revenue, axis=1)
     return merged_df
 
-def calculate_min_revenue_per_child(merged_df):
+def calculate_max_quality_add_on_per_child(merged_df):
     '''
-    Calculates the minimum (guaranteed revenue) per child.
+    Calculates the quality add on fee corresponding to maximum approved revenue
+    per child.
 
-    Returns a dataframe with an additional min revenue column.
+    Returns a dataframe with an additional max quality add on column.
+    '''
+    def calculate_max_quality_add_on(row):
+        return(
+            row['adj_full_days_approved'] * row['full_day_quality_add_on']
+            + row['adj_part_days_approved'] * row['part_day_quality_add_on']
+        )
+
+    merged_df['max_quality_add_on'] = merged_df.apply(calculate_max_quality_add_on, axis=1)
+    return merged_df
+
+def calculate_min_revenue_per_child_before_copay(merged_df):
+    '''
+    Calculates the minimum (guaranteed revenue) per child before copay.
+
+    Returns a dataframe with an additional min revenue before copay column.
     '''
     def calculate_min_revenue(row):
         # if threshold met and > 0 instances of attendance then approved days * rate type
@@ -471,16 +495,50 @@ def calculate_min_revenue_per_child(merged_df):
         else:
             full_day_min_revenue = row['full_days_attended'] * row['full_day_rate']
             part_day_min_revenue = row['part_days_attended'] * row['part_day_rate']
-        return full_day_min_revenue + part_day_min_revenue - row['copay']
+        return full_day_min_revenue + part_day_min_revenue
 
-    merged_df['min_revenue'] = merged_df.apply(calculate_min_revenue, axis=1)
+    merged_df['min_revenue_before_copay'] = merged_df.apply(calculate_min_revenue, axis=1)
     return merged_df
 
-def calculate_potential_revenue_per_child(merged_df, days_left_):
+def calculate_min_quality_add_on_per_child(merged_df):
     '''
-    Calculates the potential revenue per child.
+    Calculates the minimum (guaranteed) quality add on per child.
 
-    Returns a dataframe with an additional potential revenue column.
+    Returns a dataframe with an additional min revenue before copay column.
+    '''
+    def calculate_min_quality_add_on(row):
+        # if threshold met and > 0 instances of attendance then approved days * rate type
+        if (row['family_total_days_attended'] / row['family_total_days_approved']
+            >= ATTENDANCE_THRESHOLD):
+            if row['full_days_attended'] > 0:
+                full_day_min_quality_add_on = (
+                    row['adj_full_days_approved'] * row['full_day_quality_add_on']
+                )
+            else:
+                full_day_min_quality_add_on = 0
+            if row['part_days_attended'] > 0:
+                part_day_min_quality_add_on = (
+                    row['adj_part_days_approved'] * row['part_day_quality_add_on']
+                )
+            else:
+                part_day_min_quality_add_on = 0
+        else:
+            full_day_min_quality_add_on = (
+                row['full_days_attended'] * row['full_day_quality_add_on']
+            )
+            part_day_min_quality_add_on = (
+                row['part_days_attended'] * row['part_day_quality_add_on']
+            )
+        return full_day_min_quality_add_on + part_day_min_quality_add_on
+
+    merged_df['min_quality_add_on'] = merged_df.apply(calculate_min_quality_add_on, axis=1)
+    return merged_df
+
+def calculate_potential_revenue_per_child_before_copay(merged_df, days_left_):
+    '''
+    Calculates the potential revenue per child before copay.
+
+    Returns a dataframe with an additional potential revenue before copay column.
     '''
     def calculate_potential_revenue(row, days_left):
         # potential revenue is approved days * rate unless threshold is already not met
@@ -516,13 +574,95 @@ def calculate_potential_revenue_per_child(merged_df, days_left_):
             part_day_potential_revenue = (
                 row['adj_part_days_approved'] * row['part_day_rate']
             )
-        return full_day_potential_revenue + part_day_potential_revenue - row['copay']
+        return full_day_potential_revenue + part_day_potential_revenue
 
-    merged_df['potential_revenue'] = merged_df.apply(
+    merged_df['potential_revenue_before_copay'] = merged_df.apply(
         calculate_potential_revenue,
         args=[days_left_],
         axis=1
     )
+    return merged_df
+
+def calculate_potential_quality_add_on_per_child(merged_df, days_left_):
+    '''
+    Calculates the potential quality add on per child.
+
+    Returns a dataframe with an additional potential quality add on column.
+    '''
+    def calculate_potential_quality_add_on(row, days_left):
+        # potential quality add on is approved days * rate unless threshold is already not met
+        if row['attendance_category'] == 'Not met':
+            full_days_difference = (
+                row['adj_full_days_approved'] - row['full_days_attended']
+            )
+            part_days_difference = (
+                row['adj_part_days_approved'] - row['part_days_attended']
+            )
+            potential_revenue_full_days = np.minimum(
+                days_left, full_days_difference
+            )
+            if full_days_difference < days_left:
+                potential_revenue_part_days = np.minimum(
+                    days_left - full_days_difference,
+                    part_days_difference
+                )
+            else:
+                potential_revenue_part_days = 0
+            full_day_potential_quality_add_on = (
+                (row['full_days_attended'] + potential_revenue_full_days)
+                * row['full_day_quality_add_on']
+            )
+            part_day_potential_quality_add_on = (
+                (row['part_days_attended'] + potential_revenue_part_days)
+                * row['part_day_quality_add_on']
+            )
+        else:
+            full_day_potential_quality_add_on = (
+                row['adj_full_days_approved'] * row['full_day_quality_add_on']
+            )
+            part_day_potential_quality_add_on = (
+                row['adj_part_days_approved'] * row['part_day_quality_add_on']
+            )
+        return full_day_potential_quality_add_on + part_day_potential_quality_add_on
+
+    merged_df['potential_quality_add_on'] = merged_df.apply(
+        calculate_potential_quality_add_on,
+        args=[days_left_],
+        axis=1
+    )
+    return merged_df
+
+def calculate_family_revenue_before_copay(merged_df, rev_type_str):
+    '''
+    Sums up revenue of rev_type_str (str) over all children in the family.
+
+    Returns a dataframe with an additional family rev_type_str revenue column.
+    '''
+    merged_df['family_' + rev_type_str + '_revenue_before_copay'] = (
+        merged_df.groupby('case_number')[rev_type_str + '_revenue_before_copay']
+                 .transform(np.sum)
+    )
+    return merged_df
+
+def calculate_revenue_per_child(merged_df, rev_type_str):
+    '''
+    Calculates revenue per child of rev_type_str (str).
+
+    Returns a dataframe with an additional rev_type_str revenue column.
+    '''
+    def calculate_revenue(row):
+        # if family copay > family revenue, per child revenue is just quality add on
+        if row['family_copay'] > row['family_' + rev_type_str + '_revenue_before_copay']:
+            return row[rev_type_str + '_quality_add_on']
+        # otherwise per child revenue is (revenue + quality add on - copay)
+        else:
+            return (
+                row[rev_type_str + '_revenue_before_copay']
+                + row[rev_type_str + '_quality_add_on']
+                - row['copay_per_child']
+            )
+
+    merged_df[rev_type_str + '_revenue'] = merged_df.apply(calculate_revenue, axis=1)
     return merged_df
 
 def calculate_e_learning_revenue(merged_df):
@@ -537,7 +677,8 @@ def calculate_e_learning_revenue(merged_df):
             and row['adj_part_days_approved'] > row['part_days_attended']):
             e_learning_revenue = (
                 (row['adj_part_days_approved'] - row['part_days_attended'])
-                * (row['full_day_rate'] - row['part_day_rate'])
+                * (row['full_day_rate'] + row['full_day_quality_add_on']
+                  - row['part_day_rate'] - row['part_day_quality_add_on'])
             )
         else:
             e_learning_revenue = 0
@@ -636,9 +777,18 @@ def get_dashboard_data():
                           .pipe(cap_attended_days)
                           .pipe(calculate_family_days)
                           .pipe(categorize_family_attendance_risk, days_in_month, days_left)
-                          .pipe(calculate_max_revenue_per_child)
-                          .pipe(calculate_min_revenue_per_child)
-                          .pipe(calculate_potential_revenue_per_child, days_left)
+                          .pipe(calculate_max_revenue_per_child_before_copay)
+                          .pipe(calculate_max_quality_add_on_per_child)
+                          .pipe(calculate_family_revenue_before_copay, 'max')
+                          .pipe(calculate_revenue_per_child, 'max')
+                          .pipe(calculate_min_revenue_per_child_before_copay)
+                          .pipe(calculate_min_quality_add_on_per_child)
+                          .pipe(calculate_family_revenue_before_copay, 'min')
+                          .pipe(calculate_revenue_per_child, 'min')
+                          .pipe(calculate_potential_revenue_per_child_before_copay, days_left)
+                          .pipe(calculate_potential_quality_add_on_per_child, days_left)
+                          .pipe(calculate_family_revenue_before_copay, 'potential')
+                          .pipe(calculate_revenue_per_child, 'potential')
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
                           .pipe(filter_dashboard_cols)

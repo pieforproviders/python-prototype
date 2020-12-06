@@ -14,9 +14,14 @@ from data_input import(
     cap_attended_days,
     calculate_family_days,
     categorize_family_attendance_risk,
-    calculate_min_revenue_per_child,
-    calculate_max_revenue_per_child,
-    calculate_potential_revenue_per_child,
+    calculate_min_revenue_per_child_before_copay,
+    calculate_min_quality_add_on_per_child,
+    calculate_max_revenue_per_child_before_copay,
+    calculate_max_quality_add_on_per_child,
+    calculate_potential_revenue_per_child_before_copay,
+    calculate_potential_quality_add_on_per_child,
+    calculate_family_revenue_before_copay,
+    calculate_revenue_per_child,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
     )
@@ -45,19 +50,19 @@ def example_attendance_data():
 def example_payment_data():
     payment_data = StringIO(
         "first_header_col,,,,,,,,,,last_header_col\n"
-        "Business Name,First name,Last name,School age,Case number,Full days approved,Part days (or school days) approved,Eligibility,Total full day rate,Total part day rate,Co-pay per child\n"
-        "Lil Baby Ducklings,Jan,Schakowsky,No,100-001,10,,Eligible,20,10,15\n"
-        "Lil Baby Ducklings,Keith,Ellison,Yes,100-002,,5,Eligible,20,10,15\n"
-        "Lil Baby Ducklings,Lauren,Underwood,Yes,100-003,10,5,Eligible,20,10,15\n"
+        "Business Name,First name,Last name,School age,Case number,Full days approved,Part days (or school days) approved,Co-pay (monthly),Eligibility,Full day rate,Full day rate quality add-on,Part day rate,Part day rate quality add-on,Co-pay per child\n"
+        "Lil Baby Ducklings,Jan,Schakowsky,No,100-001,10,,15,Eligible,20,2,10,1,15\n"
+        "Lil Baby Ducklings,Keith,Ellison,Yes,100-002,,5,15,Eligible,20,2,10,1,15\n"
+        "Lil Baby Ducklings,Lauren,Underwood,Yes,100-003,10,5,15,Eligible,20,2,10,1,15\n"
     )
     return payment_data
 
 def test_get_payment_data(example_payment_data):
     expected_df = pd.DataFrame(
         [
-            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 'Eligible', 20., 10., 15.],
-            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 'Eligible', 20., 10., 15.],
-            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 'Eligible', 20., 10., 15.],
+            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 15., 'Eligible', 20., 2., 10., 1., 15.],
+            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 15., 'Eligible', 20., 2., 10., 1., 15.],
+            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 15., 'Eligible',  20., 2., 10., 1., 15.],
         ],
         columns=[
             'biz_name',
@@ -67,10 +72,13 @@ def test_get_payment_data(example_payment_data):
             'case_number',
             'full_days_approved',
             'part_days_approved',
+            'family_copay',
             'eligibility',
             'full_day_rate',
+            'full_day_quality_add_on',
             'part_day_rate',
-            'copay',
+            'part_day_quality_add_on',
+            'copay_per_child',
         ]
     )
     assert_frame_equal(get_payment_data(example_payment_data), expected_df)
@@ -460,7 +468,7 @@ class TestCategorizeFamilyAttendanceRisk:
             expected_df
         )
 
-class TestCalculateMinRevenuePerChild:
+class TestCalculateMinRevenuePerChildBeforeCopay:
     def setup_class(self):
         self.columns=[
             'child_id',
@@ -472,99 +480,214 @@ class TestCalculateMinRevenuePerChild:
             'part_days_attended',
             'full_day_rate',
             'part_day_rate',
-            'copay',
         ]
 
     def test_sure_bet(self):
         example_df = pd.DataFrame(
             [
-                ['a', 13, 15, 10, 5, 9, 4, 20, 10, 15]
+                ['a', 13, 15, 10, 5, 9, 4, 20, 10]
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', 13, 15, 10, 5, 9, 4, 20, 10, 15, 235]
+                ['a', 13, 15, 10, 5, 9, 4, 20, 10, 250]
             ],
-            columns=self.columns + ['min_revenue']
+            columns=self.columns + ['min_revenue_before_copay']
         )
-        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+        assert_frame_equal(
+            calculate_min_revenue_per_child_before_copay(example_df), expected_df
+        )
 
     def test_threshold_met_full_approved_no_full_attendance(self):
         example_df = pd.DataFrame(
             [
-                ['a', 13, 15, 14, 1, 13, 0, 20, 10, 15]
+                ['a', 13, 15, 14, 1, 13, 0, 20, 10]
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', 13, 15, 14, 1, 13, 0, 20, 10, 15, 265]
+                ['a', 13, 15, 14, 1, 13, 0, 20, 10, 280]
             ],
-            columns=self.columns + ['min_revenue']
+            columns=self.columns + ['min_revenue_before_copay']
         )
-        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+        assert_frame_equal(
+            calculate_min_revenue_per_child_before_copay(example_df), expected_df
+        )
 
     def test_threshold_met_part_approved_no_part_attendance(self):
         example_df = pd.DataFrame(
             [
-                ['a', 13, 15, 1, 14, 0, 13, 20, 10, 15]
+                ['a', 13, 15, 1, 14, 0, 13, 20, 10]
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', 13, 15, 1, 14, 0, 13, 20, 10, 15, 125]
+                ['a', 13, 15, 1, 14, 0, 13, 20, 10, 140]
             ],
-            columns=self.columns + ['min_revenue']
+            columns=self.columns + ['min_revenue_before_copay']
         )
-        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+        assert_frame_equal(
+            calculate_min_revenue_per_child_before_copay(example_df), expected_df
+        )
 
     def test_threshold_not_met(self):
         example_df = pd.DataFrame(
             [
-                ['a', 3, 10, 5, 5, 2, 1, 20, 10, 15]
+                ['a', 3, 10, 5, 5, 2, 1, 20, 10]
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', 3, 10, 5, 5, 2, 1, 20, 10, 15, 35]
+                ['a', 3, 10, 5, 5, 2, 1, 20, 10, 50]
             ],
-            columns=self.columns + ['min_revenue']
+            columns=self.columns + ['min_revenue_before_copay']
         )
-        assert_frame_equal(calculate_min_revenue_per_child(example_df), expected_df)
+        assert_frame_equal(
+            calculate_min_revenue_per_child_before_copay(example_df), expected_df
+        )
 
-class TestCalculateMaxRevenuePerChild:
+class TestCalculateMinQualityAddOnPerChild:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'family_total_days_attended',
+            'family_total_days_approved',
+            'adj_full_days_approved',
+            'adj_part_days_approved',
+            'full_days_attended',
+            'part_days_attended',
+            'full_day_quality_add_on',
+            'part_day_quality_add_on',
+        ]
+
+    def test_sure_bet(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 10, 5, 9, 4, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 10, 5, 9, 4, 2, 1, 25]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+    def test_threshold_met_full_approved_no_full_attendance(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 14, 1, 13, 0, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 14, 1, 13, 0, 2, 1, 28]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+    def test_threshold_met_part_approved_no_part_attendance(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 1, 14, 0, 13, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 1, 14, 0, 13, 2, 1, 14]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+    def test_threshold_not_met(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 3, 10, 5, 5, 2, 1, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 3, 10, 5, 5, 2, 1, 2, 1, 5]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+class TestCalculateMaxRevenuePerChildBeforeCopay:
     def setup_class(self):
         self.columns=[
             'adj_full_days_approved',
             'full_day_rate',
             'adj_part_days_approved',
             'part_day_rate',
-            'copay',
         ]
 
     def test_calculate_max_revenue_per_child(self):
         example_df = pd.DataFrame(
             [
-                [10, 20, 5, 10, 20]
+                [10, 20, 5, 10]
             ],
             columns=self.columns
         )
 
         expected_df = pd.DataFrame(
             [
-                [10, 20, 5, 10, 20, 230]
+                [10, 20, 5, 10, 250]
             ],
-            columns=self.columns + ['max_revenue']
+            columns=self.columns + ['max_revenue_before_copay']
         )
         assert_frame_equal(
-            calculate_max_revenue_per_child(example_df),
+            calculate_max_revenue_per_child_before_copay(example_df),
             expected_df
         )
 
-class TestCalculatePotentialRevenuePerChild:
+class TestCalculateMaxQualityAddOnPerChild:
+    def setup_class(self):
+        self.columns=[
+            'adj_full_days_approved',
+            'full_day_quality_add_on',
+            'adj_part_days_approved',
+            'part_day_quality_add_on',
+        ]
+
+    def test_calculate_max_quality_add_on_per_child(self):
+        example_df = pd.DataFrame(
+            [
+                [10, 2, 5, 1]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                [10, 2, 5, 1, 25]
+            ],
+            columns=self.columns + ['max_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_max_quality_add_on_per_child(example_df),
+            expected_df
+        )
+class TestCalculatePotentialRevenuePerChildBeforeCopay:
     def setup_class(self):
         self.columns = [
             'child_id',
@@ -576,27 +699,26 @@ class TestCalculatePotentialRevenuePerChild:
             'attendance_category',
             'full_day_rate',
             'part_day_rate',
-            'copay',
         ]
 
     def test_other_category(self):
         days_left = 5
         example_df = pd.DataFrame(
             [
-                ['a', '01', 10, 5, 8, 4, 'Sure bet', 20.0, 10.0, 5.0]
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 20.0, 10.0]
             ],
             columns=self.columns
         )
 
         expected_df = pd.DataFrame(
             [
-                ['a', '01', 10, 5, 8, 4, 'Sure bet', 20.0, 10.0, 5.0, 245.0]
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 20.0, 10.0, 250.0]
             ],
-            columns=self.columns + ['potential_revenue']
+            columns=self.columns + ['potential_revenue_before_copay']
         )
 
         assert_frame_equal(
-            calculate_potential_revenue_per_child(example_df, days_left),
+            calculate_potential_revenue_per_child_before_copay(example_df, days_left),
             expected_df
         )
 
@@ -605,19 +727,19 @@ class TestCalculatePotentialRevenuePerChild:
         days_left = 5
         example_df = pd.DataFrame(
             [
-                ['a', '01', 10, 5, 1, 1, 'Not met', 20.0, 10.0, 5.0],
+                ['a', '01', 10, 5, 1, 1, 'Not met', 20.0, 10.0],
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', '01', 10, 5, 1, 1, 'Not met', 20.0, 10.0, 5.0, 125.0],
+                ['a', '01', 10, 5, 1, 1, 'Not met', 20.0, 10.0, 130.0],
             ],
-            columns=self.columns + ['potential_revenue']
+            columns=self.columns + ['potential_revenue_before_copay']
         )
 
         assert_frame_equal(
-            calculate_potential_revenue_per_child(example_df, days_left),
+            calculate_potential_revenue_per_child_before_copay(example_df, days_left),
             expected_df
         )
 
@@ -625,19 +747,19 @@ class TestCalculatePotentialRevenuePerChild:
         days_left = 5
         example_df = pd.DataFrame(
             [
-                ['a', '01', 2, 20, 1, 1, 'Not met', 20.0, 10.0, 5.0],
+                ['a', '01', 2, 20, 1, 1, 'Not met', 20.0, 10.0],
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', '01', 2, 20, 1, 1, 'Not met', 20.0, 10.0, 5.0, 85.0],
+                ['a', '01', 2, 20, 1, 1, 'Not met', 20.0, 10.0, 90.0],
             ],
-            columns=self.columns + ['potential_revenue']
+            columns=self.columns + ['potential_revenue_before_copay']
         )
 
         assert_frame_equal(
-            calculate_potential_revenue_per_child(example_df, days_left),
+            calculate_potential_revenue_per_child_before_copay(example_df, days_left),
             expected_df
         )
 
@@ -645,19 +767,19 @@ class TestCalculatePotentialRevenuePerChild:
         days_left = 5
         example_df = pd.DataFrame(
             [
-                ['a', '01', 20, 0, 1, 0, 'Not met', 20.0, 10.0, 5.0],
+                ['a', '01', 20, 0, 1, 0, 'Not met', 20.0, 10.0],
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', '01', 20, 0, 1, 0, 'Not met', 20.0, 10.0, 5.0, 115.0],
+                ['a', '01', 20, 0, 1, 0, 'Not met', 20.0, 10.0, 120.0],
             ],
-            columns=self.columns + ['potential_revenue']
+            columns=self.columns + ['potential_revenue_before_copay']
         )
 
         assert_frame_equal(
-            calculate_potential_revenue_per_child(example_df, days_left),
+            calculate_potential_revenue_per_child_before_copay(example_df, days_left),
             expected_df
         )
 
@@ -665,19 +787,223 @@ class TestCalculatePotentialRevenuePerChild:
         days_left = 5
         example_df = pd.DataFrame(
             [
-                ['a', '01', 0, 20, 0, 1, 'Not met', 20.0, 10.0, 5.0],
+                ['a', '01', 0, 20, 0, 1, 'Not met', 20.0, 10.0],
             ],
             columns=self.columns
         )
         expected_df = pd.DataFrame(
             [
-                ['a', '01', 0, 20, 0, 1, 'Not met', 20.0, 10.0, 5.0, 55.0],
+                ['a', '01', 0, 20, 0, 1, 'Not met', 20.0, 10.0, 60.0],
             ],
-            columns=self.columns + ['potential_revenue']
+            columns=self.columns + ['potential_revenue_before_copay']
         )
 
         assert_frame_equal(
-            calculate_potential_revenue_per_child(example_df, days_left),
+            calculate_potential_revenue_per_child_before_copay(example_df, days_left),
+            expected_df
+        )
+
+class TestCalculatePotentialQualityAddOnPerChild:
+    def setup_class(self):
+        self.columns = [
+            'child_id',
+            'case_number',
+            'adj_full_days_approved',
+            'adj_part_days_approved',
+            'full_days_attended',
+            'part_days_attended',
+            'attendance_category',
+            'full_day_quality_add_on',
+            'part_day_quality_add_on',
+        ]
+
+    def test_other_category(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 2.0, 1.0]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 2.0, 1.0, 25.0]
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_all_potential_full_days(self):
+        # test case from initial_rules_visualization doc
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 1, 1, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 1, 1, 'Not met', 2.0, 1.0, 13.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_potential_full_and_part_days(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 20, 1, 1, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 20, 1, 1, 'Not met', 2.0, 1.0, 9.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_only_full_days_approved(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 20, 0, 1, 0, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 20, 0, 1, 0, 'Not met', 2.0, 1.0, 12.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_only_part_days_approved(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 20, 0, 1, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 20, 0, 1, 'Not met', 2.0, 1.0, 6.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+def test_calculate_family_revenue_before_copay():
+    example_df = pd.DataFrame(
+        [
+            ['a', '01', 50.0],
+            ['b', '01', 20.0],
+            ['c', '02', 10.0],
+        ],
+        columns=[
+            'child_id',
+            'case_number',
+            'potential_revenue_before_copay',
+        ]
+    )
+
+    expected_df = pd.DataFrame(
+        [
+            ['a', '01', 50.0, 70.0],
+            ['b', '01', 20.0, 70.0],
+            ['c', '02', 10.0, 10.0],
+        ],
+        columns=[
+            'child_id',
+            'case_number',
+            'potential_revenue_before_copay',
+            'family_potential_revenue_before_copay',
+        ]
+    )
+
+    assert_frame_equal(
+        calculate_family_revenue_before_copay(example_df, 'potential'),
+        expected_df
+    )
+
+class TestCalculateRevenuePerChild:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'family_copay',
+            'copay_per_child',
+            'min_revenue_before_copay',
+            'min_quality_add_on',
+            'family_min_revenue_before_copay',
+        ]
+
+    def test_copay_less_than_revenue(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 201],
+                ['b', 200, 100, 51, 9, 201],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 201, 59],
+                ['b', 200, 100, 51, 9, 201, -40],
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_revenue_per_child(example_df, 'min'),
+            expected_df
+        )
+
+    def test_copay_more_than_revenue(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 199],
+                ['b', 200, 100, 49, 9, 199],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 199, 9],
+                ['b', 200, 100, 49, 9, 199, 9],
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_revenue_per_child(example_df, 'min'),
             expected_df
         )
 
@@ -689,7 +1015,9 @@ def test_calculate_e_learning_revenue():
             'part_days_attended': [3, 5, 3, 5],
             'adj_part_days_approved': [5, 5, 5, 5],
             'full_day_rate': [20, 20, 20, 20],
+            'full_day_quality_add_on':[5, 5, 5, 5],
             'part_day_rate': [10, 10, 10, 10],
+            'part_day_quality_add_on':[2, 2, 2, 2],
         }
     )
 
@@ -700,8 +1028,10 @@ def test_calculate_e_learning_revenue():
             'part_days_attended': [3, 5, 3, 5],
             'adj_part_days_approved': [5, 5, 5, 5],
             'full_day_rate': [20, 20, 20, 20],
+            'full_day_quality_add_on':[5, 5, 5, 5],
             'part_day_rate': [10, 10, 10, 10],
-            'e_learning_revenue_potential': [20, 0, 0, 0],
+            'part_day_quality_add_on':[2, 2, 2, 2],
+            'e_learning_revenue_potential': [26, 0, 0, 0],
         }
     )
     assert_frame_equal(calculate_e_learning_revenue(example_df), expected_df)
