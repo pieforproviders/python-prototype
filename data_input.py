@@ -500,6 +500,40 @@ def calculate_min_revenue_per_child_before_copay(merged_df):
     merged_df['min_revenue_before_copay'] = merged_df.apply(calculate_min_revenue, axis=1)
     return merged_df
 
+def calculate_min_quality_add_on_per_child(merged_df):
+    '''
+    Calculates the minimum (guaranteed) quality add on per child.
+
+    Returns a dataframe with an additional min revenue before copay column.
+    '''
+    def calculate_min_quality_add_on(row):
+        # if threshold met and > 0 instances of attendance then approved days * rate type
+        if (row['family_total_days_attended'] / row['family_total_days_approved']
+            >= ATTENDANCE_THRESHOLD):
+            if row['full_days_attended'] > 0:
+                full_day_min_quality_add_on = (
+                    row['adj_full_days_approved'] * row['full_day_quality_add_on']
+                )
+            else:
+                full_day_min_quality_add_on = 0
+            if row['part_days_attended'] > 0:
+                part_day_min_quality_add_on = (
+                    row['adj_part_days_approved'] * row['part_day_quality_add_on']
+                )
+            else:
+                part_day_min_quality_add_on = 0
+        else:
+            full_day_min_quality_add_on = (
+                row['full_days_attended'] * row['full_day_quality_add_on']
+            )
+            part_day_min_quality_add_on = (
+                row['part_days_attended'] * row['part_day_quality_add_on']
+            )
+        return full_day_min_quality_add_on + part_day_min_quality_add_on
+
+    merged_df['min_quality_add_on'] = merged_df.apply(calculate_min_quality_add_on, axis=1)
+    return merged_df
+
 def calculate_potential_revenue_per_child_before_copay(merged_df, days_left_):
     '''
     Calculates the potential revenue per child before copay.

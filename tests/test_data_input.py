@@ -15,6 +15,7 @@ from data_input import(
     calculate_family_days,
     categorize_family_attendance_risk,
     calculate_min_revenue_per_child_before_copay,
+    calculate_min_quality_add_on_per_child,
     calculate_max_revenue_per_child_before_copay,
     calculate_max_quality_add_on_per_child,
     calculate_potential_revenue_per_child_before_copay,
@@ -544,6 +545,88 @@ class TestCalculateMinRevenuePerChildBeforeCopay:
         )
         assert_frame_equal(
             calculate_min_revenue_per_child_before_copay(example_df), expected_df
+        )
+
+class TestCalculateMinQualityAddOnPerChild:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'family_total_days_attended',
+            'family_total_days_approved',
+            'adj_full_days_approved',
+            'adj_part_days_approved',
+            'full_days_attended',
+            'part_days_attended',
+            'full_day_quality_add_on',
+            'part_day_quality_add_on',
+        ]
+
+    def test_sure_bet(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 10, 5, 9, 4, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 10, 5, 9, 4, 2, 1, 25]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+    def test_threshold_met_full_approved_no_full_attendance(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 14, 1, 13, 0, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 14, 1, 13, 0, 2, 1, 28]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+    def test_threshold_met_part_approved_no_part_attendance(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 1, 14, 0, 13, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 13, 15, 1, 14, 0, 13, 2, 1, 14]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
+        )
+
+    def test_threshold_not_met(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 3, 10, 5, 5, 2, 1, 2, 1]
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', 3, 10, 5, 5, 2, 1, 2, 1, 5]
+            ],
+            columns=self.columns + ['min_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_min_quality_add_on_per_child(example_df), expected_df
         )
 
 class TestCalculateMaxRevenuePerChildBeforeCopay:
