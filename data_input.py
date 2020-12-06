@@ -79,10 +79,10 @@ def get_payment_data(filepath):
             'Part days (or school days) approved',
             'Co-pay (monthly)',
             'Eligibility',
+            'Full day rate',
             'Full day rate quality add-on',
+            'Part day rate',
             'Part day rate quality add-on',
-            'Total full day rate',
-            'Total part day rate',
             'Co-pay per child',
         ],
         dtype={
@@ -95,10 +95,10 @@ def get_payment_data(filepath):
             'Part days (or school days) approved': np.float_,
             'Co-pay (monthly)': np.float_,
             'Eligibility': str,
+            'Full day rate': np.float_,
             'Full day rate quality add-on': np.float_,
+            'Part day rate': np.float_,
             'Part day rate quality add-on': np.float_,
-            'Total full day rate': np.float_,
-            'Total part day rate': np.float_,
             'Co-pay per child': np.float_,
         }
     )
@@ -114,10 +114,10 @@ def get_payment_data(filepath):
             'Part days (or school days) approved': 'part_days_approved',
             'Co-pay (monthly)': 'family_copay',
             'Eligibility': 'eligibility',
+            'Full day rate': 'full_day_rate',
             'Full day rate quality add-on': 'full_day_quality_add_on',
+            'Part day rate': 'part_day_rate',
             'Part day rate quality add-on': 'part_day_quality_add_on',
-            'Total full day rate': 'full_day_rate',
-            'Total part day rate': 'part_day_rate',
             'Co-pay per child': 'copay_per_child',
         },
         inplace=True

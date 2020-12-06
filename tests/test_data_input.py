@@ -45,19 +45,19 @@ def example_attendance_data():
 def example_payment_data():
     payment_data = StringIO(
         "first_header_col,,,,,,,,,,last_header_col\n"
-        "Business Name,First name,Last name,School age,Case number,Full days approved,Part days (or school days) approved,Co-pay (monthly),Eligibility,Full day rate quality add-on,Part day rate quality add-on,Total full day rate,Total part day rate,Co-pay per child\n"
-        "Lil Baby Ducklings,Jan,Schakowsky,No,100-001,10,,15,Eligible,2,1,20,10,15\n"
-        "Lil Baby Ducklings,Keith,Ellison,Yes,100-002,,5,15,Eligible,2,1,20,10,15\n"
-        "Lil Baby Ducklings,Lauren,Underwood,Yes,100-003,10,5,15,Eligible,2,1,20,10,15\n"
+        "Business Name,First name,Last name,School age,Case number,Full days approved,Part days (or school days) approved,Co-pay (monthly),Eligibility,Full day rate,Full day rate quality add-on,Part day rate,Part day rate quality add-on,Co-pay per child\n"
+        "Lil Baby Ducklings,Jan,Schakowsky,No,100-001,10,,15,Eligible,20,2,10,1,15\n"
+        "Lil Baby Ducklings,Keith,Ellison,Yes,100-002,,5,15,Eligible,20,2,10,1,15\n"
+        "Lil Baby Ducklings,Lauren,Underwood,Yes,100-003,10,5,15,Eligible,20,2,10,1,15\n"
     )
     return payment_data
 
 def test_get_payment_data(example_payment_data):
     expected_df = pd.DataFrame(
         [
-            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 15., 'Eligible', 2., 1., 20., 10., 15.],
-            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 15., 'Eligible', 2., 1.,20., 10., 15.],
-            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 15., 'Eligible', 2., 1., 20., 10., 15.],
+            ['Lil Baby Ducklings', 'Jan', 'Schakowsky', 'No', '100-001', 10., 0., 15., 'Eligible', 20., 2., 10., 1., 15.],
+            ['Lil Baby Ducklings', 'Keith', 'Ellison', 'Yes', '100-002', 0., 5., 15., 'Eligible', 20., 2., 10., 1., 15.],
+            ['Lil Baby Ducklings', 'Lauren', 'Underwood', 'Yes', '100-003', 10., 5., 15., 'Eligible',  20., 2., 10., 1., 15.],
         ],
         columns=[
             'biz_name',
@@ -69,10 +69,10 @@ def test_get_payment_data(example_payment_data):
             'part_days_approved',
             'family_copay',
             'eligibility',
-            'full_day_quality_add_on',
-            'part_day_quality_add_on',
             'full_day_rate',
+            'full_day_quality_add_on',
             'part_day_rate',
+            'part_day_quality_add_on',
             'copay_per_child',
         ]
     )
