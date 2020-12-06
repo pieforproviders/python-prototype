@@ -632,6 +632,18 @@ def calculate_potential_quality_add_on_per_child(merged_df, days_left_):
     )
     return merged_df
 
+def calculate_family_revenue_before_copay(merged_df, rev_type_str):
+    '''
+    Sums up revenue of rev_type_str (str) over all children in the family.
+
+    Returns a dataframe with an additional family rev_type_str revenue column.
+    '''
+    merged_df['family_' + rev_type_str + '_revenue_before_copay'] = (
+        merged_df.groupby('case_number')[rev_type_str + '_revenue_before_copay']
+                 .transform(np.sum)
+    )
+    return merged_df
+
 def calculate_e_learning_revenue(merged_df):
     '''
     Calculate the additional rev potential if all part days become full

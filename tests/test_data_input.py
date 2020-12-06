@@ -20,6 +20,7 @@ from data_input import(
     calculate_max_quality_add_on_per_child,
     calculate_potential_revenue_per_child_before_copay,
     calculate_potential_quality_add_on_per_child,
+    calculate_family_revenue_before_copay,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
     )
@@ -916,6 +917,39 @@ class TestCalculatePotentialQualityAddOnPerChild:
             calculate_potential_quality_add_on_per_child(example_df, days_left),
             expected_df
         )
+
+def test_calculate_family_revenue_before_copay():
+    example_df = pd.DataFrame(
+        [
+            ['a', '01', 50.0],
+            ['b', '01', 20.0],
+            ['c', '02', 10.0],
+        ],
+        columns=[
+            'child_id',
+            'case_number',
+            'potential_revenue_before_copay',
+        ]
+    )
+
+    expected_df = pd.DataFrame(
+        [
+            ['a', '01', 50.0, 70.0],
+            ['b', '01', 20.0, 70.0],
+            ['c', '02', 10.0, 10.0],
+        ],
+        columns=[
+            'child_id',
+            'case_number',
+            'potential_revenue_before_copay',
+            'family_potential_revenue_before_copay',
+        ]
+    )
+
+    assert_frame_equal(
+        calculate_family_revenue_before_copay(example_df, 'potential'),
+        expected_df
+    )
 
 def test_calculate_e_learning_revenue():
     example_df = pd.DataFrame(
