@@ -583,6 +583,55 @@ def calculate_potential_revenue_per_child_before_copay(merged_df, days_left_):
     )
     return merged_df
 
+def calculate_potential_quality_add_on_per_child(merged_df, days_left_):
+    '''
+    Calculates the potential quality add on per child.
+
+    Returns a dataframe with an additional potential quality add on column.
+    '''
+    def calculate_potential_quality_add_on(row, days_left):
+        # potential quality add on is approved days * rate unless threshold is already not met
+        if row['attendance_category'] == 'Not met':
+            full_days_difference = (
+                row['adj_full_days_approved'] - row['full_days_attended']
+            )
+            part_days_difference = (
+                row['adj_part_days_approved'] - row['part_days_attended']
+            )
+            potential_revenue_full_days = np.minimum(
+                days_left, full_days_difference
+            )
+            if full_days_difference < days_left:
+                potential_revenue_part_days = np.minimum(
+                    days_left - full_days_difference,
+                    part_days_difference
+                )
+            else:
+                potential_revenue_part_days = 0
+            full_day_potential_quality_add_on = (
+                (row['full_days_attended'] + potential_revenue_full_days)
+                * row['full_day_quality_add_on']
+            )
+            part_day_potential_quality_add_on = (
+                (row['part_days_attended'] + potential_revenue_part_days)
+                * row['part_day_quality_add_on']
+            )
+        else:
+            full_day_potential_quality_add_on = (
+                row['adj_full_days_approved'] * row['full_day_quality_add_on']
+            )
+            part_day_potential_quality_add_on = (
+                row['adj_part_days_approved'] * row['part_day_quality_add_on']
+            )
+        return full_day_potential_quality_add_on + part_day_potential_quality_add_on
+
+    merged_df['potential_quality_add_on'] = merged_df.apply(
+        calculate_potential_quality_add_on,
+        args=[days_left_],
+        axis=1
+    )
+    return merged_df
+
 def calculate_e_learning_revenue(merged_df):
     '''
     Calculate the additional rev potential if all part days become full

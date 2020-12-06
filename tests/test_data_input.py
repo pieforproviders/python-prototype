@@ -19,6 +19,7 @@ from data_input import(
     calculate_max_revenue_per_child_before_copay,
     calculate_max_quality_add_on_per_child,
     calculate_potential_revenue_per_child_before_copay,
+    calculate_potential_quality_add_on_per_child,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
     )
@@ -797,6 +798,122 @@ class TestCalculatePotentialRevenuePerChildBeforeCopay:
 
         assert_frame_equal(
             calculate_potential_revenue_per_child_before_copay(example_df, days_left),
+            expected_df
+        )
+
+class TestCalculatePotentialQualityAddOnPerChild:
+    def setup_class(self):
+        self.columns = [
+            'child_id',
+            'case_number',
+            'adj_full_days_approved',
+            'adj_part_days_approved',
+            'full_days_attended',
+            'part_days_attended',
+            'attendance_category',
+            'full_day_quality_add_on',
+            'part_day_quality_add_on',
+        ]
+
+    def test_other_category(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 2.0, 1.0]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 8, 4, 'Sure bet', 2.0, 1.0, 25.0]
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_all_potential_full_days(self):
+        # test case from initial_rules_visualization doc
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 1, 1, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 10, 5, 1, 1, 'Not met', 2.0, 1.0, 13.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_potential_full_and_part_days(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 20, 1, 1, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 2, 20, 1, 1, 'Not met', 2.0, 1.0, 9.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_only_full_days_approved(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 20, 0, 1, 0, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 20, 0, 1, 0, 'Not met', 2.0, 1.0, 12.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
+            expected_df
+        )
+
+    def test_not_met_only_part_days_approved(self):
+        days_left = 5
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 20, 0, 1, 'Not met', 2.0, 1.0],
+            ],
+            columns=self.columns
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['a', '01', 0, 20, 0, 1, 'Not met', 2.0, 1.0, 6.0],
+            ],
+            columns=self.columns + ['potential_quality_add_on']
+        )
+
+        assert_frame_equal(
+            calculate_potential_quality_add_on_per_child(example_df, days_left),
             expected_df
         )
 
