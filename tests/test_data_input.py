@@ -1015,7 +1015,9 @@ def test_calculate_e_learning_revenue():
             'part_days_attended': [3, 5, 3, 5],
             'adj_part_days_approved': [5, 5, 5, 5],
             'full_day_rate': [20, 20, 20, 20],
+            'full_day_quality_add_on':[5, 5, 5, 5],
             'part_day_rate': [10, 10, 10, 10],
+            'part_day_quality_add_on':[2, 2, 2, 2],
         }
     )
 
@@ -1026,8 +1028,10 @@ def test_calculate_e_learning_revenue():
             'part_days_attended': [3, 5, 3, 5],
             'adj_part_days_approved': [5, 5, 5, 5],
             'full_day_rate': [20, 20, 20, 20],
+            'full_day_quality_add_on':[5, 5, 5, 5],
             'part_day_rate': [10, 10, 10, 10],
-            'e_learning_revenue_potential': [20, 0, 0, 0],
+            'part_day_quality_add_on':[2, 2, 2, 2],
+            'e_learning_revenue_potential': [26, 0, 0, 0],
         }
     )
     assert_frame_equal(calculate_e_learning_revenue(example_df), expected_df)

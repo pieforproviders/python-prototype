@@ -677,7 +677,8 @@ def calculate_e_learning_revenue(merged_df):
             and row['adj_part_days_approved'] > row['part_days_attended']):
             e_learning_revenue = (
                 (row['adj_part_days_approved'] - row['part_days_attended'])
-                * (row['full_day_rate'] - row['part_day_rate'])
+                * (row['full_day_rate'] + row['full_day_quality_add_on']
+                  - row['part_day_rate'] - row['part_day_quality_add_on'])
             )
         else:
             e_learning_revenue = 0
