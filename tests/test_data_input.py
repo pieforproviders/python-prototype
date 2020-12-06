@@ -21,6 +21,7 @@ from data_input import(
     calculate_potential_revenue_per_child_before_copay,
     calculate_potential_quality_add_on_per_child,
     calculate_family_revenue_before_copay,
+    calculate_revenue_per_child,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
     )
@@ -950,6 +951,61 @@ def test_calculate_family_revenue_before_copay():
         calculate_family_revenue_before_copay(example_df, 'potential'),
         expected_df
     )
+
+class TestCalculateRevenuePerChild:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'family_copay',
+            'copay_per_child',
+            'min_revenue_before_copay',
+            'min_quality_add_on',
+            'family_min_revenue_before_copay',
+        ]
+
+    def test_copay_less_than_revenue(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 201],
+                ['b', 200, 100, 51, 9, 201],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 201, 59],
+                ['b', 200, 100, 51, 9, 201, -40],
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_revenue_per_child(example_df, 'min'),
+            expected_df
+        )
+
+    def test_copay_more_than_revenue(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 199],
+                ['b', 200, 100, 49, 9, 199],
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                ['a', 200, 100, 150, 9, 199, 9],
+                ['b', 200, 100, 49, 9, 199, 9],
+            ],
+            columns=self.columns + ['min_revenue']
+        )
+
+        assert_frame_equal(
+            calculate_revenue_per_child(example_df, 'min'),
+            expected_df
+        )
 
 def test_calculate_e_learning_revenue():
     example_df = pd.DataFrame(

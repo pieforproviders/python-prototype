@@ -644,6 +644,27 @@ def calculate_family_revenue_before_copay(merged_df, rev_type_str):
     )
     return merged_df
 
+def calculate_revenue_per_child(merged_df, rev_type_str):
+    '''
+    Calculates revenue per child of rev_type_str (str).
+
+    Returns a dataframe with an additional rev_type_str revenue column.
+    '''
+    def calculate_revenue(row):
+        # if family copay > family revenue, per child revenue is just quality add on
+        if row['family_copay'] > row['family_' + rev_type_str + '_revenue_before_copay']:
+            return row[rev_type_str + '_quality_add_on']
+        # otherwise per child revenue is (revenue + quality add on - copay)
+        else:
+            return (
+                row[rev_type_str + '_revenue_before_copay']
+                + row[rev_type_str + '_quality_add_on']
+                - row['copay_per_child']
+            )
+
+    merged_df[rev_type_str + '_revenue'] = merged_df.apply(calculate_revenue, axis=1)
+    return merged_df
+
 def calculate_e_learning_revenue(merged_df):
     '''
     Calculate the additional rev potential if all part days become full
