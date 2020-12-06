@@ -151,7 +151,7 @@ def make_revenue_chart(df):
     )
     trace_max = go.Bar(
         name=(
-            'Max. revenue approved <br>' + '$' + str(round(max_approved_revenue_sum))
+            'Max. approved revenue <br>' + '$' + str(round(max_approved_revenue_sum))
         ),
         y=['revenue'],
         x=[potential_max_delta],
@@ -248,7 +248,7 @@ def make_table(df):
                 'format': FormatTemplate.money(2)
             }, {
                 'id': 'max_revenue',
-                'name': 'Max. revenue approved',
+                'name': 'Max. approved revenue',
                 'type': 'numeric',
                 'format': FormatTemplate.money(2)
             }, {
