@@ -6,6 +6,7 @@ from io import StringIO
 
 from data_input import(
     get_payment_data,
+    validate_copay,
     calculate_days_in_month,
     count_days_attended,
     extract_ineligible_children,
@@ -82,6 +83,41 @@ def test_get_payment_data(example_payment_data):
         ]
     )
     assert_frame_equal(get_payment_data(example_payment_data), expected_df)
+
+class TestValidateCopay:
+    def setup_class(self):
+        self.columns=[
+            'child_id',
+            'case_number',
+            'family_copay'
+        ]
+
+    def test_valid_copay_passes(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 4.],
+                ['b', '01', 4.],
+                ['c', '02', 5.],
+            ],
+            columns=self.columns
+        )
+        validate_copay(example_df)
+
+    def test_valid_copay_fails(self):
+        example_df = pd.DataFrame(
+            [
+                ['a', '01', 4.],
+                ['b', '01', 5.],
+                ['c', '02', 5.],
+                ['d', '03', 6.],
+                ['d', '03', 7.],
+            ],
+            columns=self.columns
+        )
+        with pytest.raises(Exception) as e_info:
+            validate_copay(example_df)
+        assert e_info.value.args[0] == 'The following case numbers have different copay amounts'
+        assert e_info.value.args[1] == '01, 03'
 
 class TestCalculateMonthDays:
     def test_calculate_days_in_month(self):

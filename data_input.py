@@ -165,6 +165,20 @@ def clean_attendance_data(attendance_df):
 
     return attendance_df
 
+def validate_copay(payment_df):
+    '''Raises an error if copay is not the same across a family'''
+    family_copay_same = (
+        payment_df.groupby('case_number')['family_copay']
+                  .nunique()
+                  .reset_index()
+    )
+    errors = family_copay_same.loc[family_copay_same['family_copay'] > 1, 'case_number']
+    if errors.size != 0:
+        raise ValueError(
+            'The following case numbers have different copay amounts',
+            ', '.join(case for case in errors)
+        )
+
 def clean_payment_data(payment_df):
     '''Cleans and prepares payment data for subsequent calculations'''
     # trim whitespace for user input text columns
@@ -757,6 +771,10 @@ def get_dashboard_data():
 
     # process data for dashboard
     attendance_processed = count_days_attended(attendance_clean)
+
+    # raise error if family copay amounts are different within a family
+    validate_copay(payment)
+
     payment_processed = (
         payment.pipe(clean_payment_data)
                .pipe(generate_child_id)
