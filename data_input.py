@@ -458,6 +458,22 @@ def calculate_max_revenue_per_child_before_copay(merged_df):
     merged_df['max_revenue_before_copay'] = merged_df.apply(calculate_max_revenue, axis=1)
     return merged_df
 
+def calculate_max_quality_add_on_per_child(merged_df):
+    '''
+    Calculates the quality add on fee corresponding to maximum approved revenue
+    per child.
+
+    Returns a dataframe with an additional max quality add on column.
+    '''
+    def calculate_max_quality_add_on(row):
+        return(
+            row['adj_full_days_approved'] * row['full_day_quality_add_on']
+            + row['adj_part_days_approved'] * row['part_day_quality_add_on']
+        )
+
+    merged_df['max_quality_add_on'] = merged_df.apply(calculate_max_quality_add_on, axis=1)
+    return merged_df
+
 def calculate_min_revenue_per_child_before_copay(merged_df):
     '''
     Calculates the minimum (guaranteed revenue) per child before copay.

@@ -16,6 +16,7 @@ from data_input import(
     categorize_family_attendance_risk,
     calculate_min_revenue_per_child_before_copay,
     calculate_max_revenue_per_child_before_copay,
+    calculate_max_quality_add_on_per_child,
     calculate_potential_revenue_per_child_before_copay,
     calculate_e_learning_revenue,
     calculate_attendance_rate,
@@ -573,6 +574,33 @@ class TestCalculateMaxRevenuePerChildBeforeCopay:
             expected_df
         )
 
+class TestCalculateMaxQualityAddOnPerChild:
+    def setup_class(self):
+        self.columns=[
+            'adj_full_days_approved',
+            'full_day_quality_add_on',
+            'adj_part_days_approved',
+            'part_day_quality_add_on',
+        ]
+
+    def test_calculate_max_quality_add_on_per_child(self):
+        example_df = pd.DataFrame(
+            [
+                [10, 2, 5, 1]
+            ],
+            columns=self.columns
+        )
+
+        expected_df = pd.DataFrame(
+            [
+                [10, 2, 5, 1, 25]
+            ],
+            columns=self.columns + ['max_quality_add_on']
+        )
+        assert_frame_equal(
+            calculate_max_quality_add_on_per_child(example_df),
+            expected_df
+        )
 class TestCalculatePotentialRevenuePerChildBeforeCopay:
     def setup_class(self):
         self.columns = [
