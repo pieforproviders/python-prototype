@@ -485,11 +485,11 @@ def calculate_min_revenue_per_child_before_copay(merged_df):
     merged_df['min_revenue_before_copay'] = merged_df.apply(calculate_min_revenue, axis=1)
     return merged_df
 
-def calculate_potential_revenue_per_child(merged_df, days_left_):
+def calculate_potential_revenue_per_child_before_copay(merged_df, days_left_):
     '''
-    Calculates the potential revenue per child.
+    Calculates the potential revenue per child before copay.
 
-    Returns a dataframe with an additional potential revenue column.
+    Returns a dataframe with an additional potential revenue before copay column.
     '''
     def calculate_potential_revenue(row, days_left):
         # potential revenue is approved days * rate unless threshold is already not met
@@ -525,9 +525,9 @@ def calculate_potential_revenue_per_child(merged_df, days_left_):
             part_day_potential_revenue = (
                 row['adj_part_days_approved'] * row['part_day_rate']
             )
-        return full_day_potential_revenue + part_day_potential_revenue - row['copay_per_child']
+        return full_day_potential_revenue + part_day_potential_revenue
 
-    merged_df['potential_revenue'] = merged_df.apply(
+    merged_df['potential_revenue_before_copay'] = merged_df.apply(
         calculate_potential_revenue,
         args=[days_left_],
         axis=1
@@ -647,7 +647,7 @@ def get_dashboard_data():
                           .pipe(categorize_family_attendance_risk, days_in_month, days_left)
                           .pipe(calculate_max_revenue_per_child)
                           .pipe(calculate_min_revenue_per_child_before_copay)
-                          .pipe(calculate_potential_revenue_per_child, days_left)
+                          .pipe(calculate_potential_revenue_per_child_before_copay, days_left)
                           .pipe(calculate_e_learning_revenue)
                           .pipe(calculate_attendance_rate)
                           .pipe(filter_dashboard_cols)
